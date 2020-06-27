@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["sparse_vector","The sparse vector mechanism Sensitivity (Delta) is assumed to be 1. Privacy parameters must be scaled  appropriately if this is not the case. "]]});

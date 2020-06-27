@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["integer_partition_mechanism_with_bounds","The integer partition mechanism given bounds"],["integer_partition_mechanism_with_weights","The integer partition mechanism given a pre-computed weight table."]],"struct":[["IntegerPartitionOptions",""]]});

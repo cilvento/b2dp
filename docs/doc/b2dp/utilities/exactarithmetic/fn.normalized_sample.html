@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `normalized_sample` fn in crate `b2dp`."><meta name="keywords" content="rust, rustlang, rust-lang, normalized_sample"><title>b2dp::utilities::exactarithmetic::normalized_sample - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../b2dp/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class='location'><a href='../../index.html'>b2dp</a>::<wbr><a href='../index.html'>utilities</a>::<wbr><a href='index.html'>exactarithmetic</a></p><script>window.sidebarCurrent = {name: 'normalized_sample', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../src/b2dp/utilities/exactarithmetic.rs.html#114-195' title='goto source code'>[src]</a></span><span class='in-band'>Function <a href='../../index.html'>b2dp</a>::<wbr><a href='../index.html'>utilities</a>::<wbr><a href='index.html'>exactarithmetic</a>::<wbr><a class="fn" href=''>normalized_sample</a></span></h1><pre class='rust fn'>pub fn normalized_sample&lt;R:&nbsp;<a class="trait" href="https://docs.rs/rug/~1.8/rug/rand/trait.ThreadRandGen.html" title="trait rug::rand::ThreadRandGen">ThreadRandGen</a>&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;weights: &amp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="https://docs.rs/rug/~1.8/rug/float/big/struct.Float.html" title="struct rug::float::big::Float">Float</a>&gt;, <br>&nbsp;&nbsp;&nbsp;&nbsp;arithmetic_config: &amp;mut <a class="struct" href="../../../b2dp/utilities/exactarithmetic/struct.ArithmeticConfig.html" title="struct b2dp::utilities::exactarithmetic::ArithmeticConfig">ArithmeticConfig</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;rng: R, <br>&nbsp;&nbsp;&nbsp;&nbsp;optimize: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>, &amp;'static <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;</pre><div class='docblock'><p>Normalized Weighted Sampling
+Returns the index of the element sampled according to the weights provided.
+Uses optimized sampling if <code>optimize</code> set to true. Setting <code>optimize</code> to true
+exacerbates timing channels. </p>
+<h2 id="arguments" class="section-header"><a href="#arguments">Arguments</a></h2>
+<ul>
+<li><code>weights</code>: the set of weights to use for sampling; all weights must be positive, 
+zero-weight elements are not permitted.</li>
+<li><code>arithmetic_config</code>: the arithmetic config specifying precision</li>
+<li><code>rng</code>: source of randomness.</li>
+<li><code>optimize</code>: whether to optimize sampling, introducing a timing channel and an error condition
+side channel.</li>
+</ul>
+<h2 id="returns" class="section-header"><a href="#returns">Returns</a></h2>
+<p>Returns an index of an element sampled according to the weights provided. If the precision
+of the provided ArithmeticConfig is insufficient for sampling, the method returns an error.
+Note that errors are <strong>not</strong> returned on inexact arithmetic, and the caller is responsible
+for calling <code>enter_exact_scope()</code> and  <code>exit_exact_scope()</code> to monitor inexact arithmetic.</p>
+<h2 id="known-timing-channels" class="section-header"><a href="#known-timing-channels">Known Timing Channels</a></h2>
+<p>This method has known timing channels. They result from: 
+(1) Generating a random value in [0,2^k] and 
+(2) (In optimized sampling only) To determine the index corresponding to the random value, 
+the method iterates through cumulative weights
+and terminates the loop when the index is found and
+(3) (In optimized sampling only) Checking for zero weights 
+These can be exploited in several ways:</p>
+<ul>
+<li><strong>Rejection probability:</strong> if the adversary can control the total weight of the utilities
+such that the probability of rejection in the random index generation stage changes,
+the time needed for sampling will vary between adjacent databases. The difference in time
+will depend on the speed of random number generation. By default, ArithmeticConfig sets the 
+minimum retries to 1. To reduce the probability that this timing channel is accessible to an 
+adversary, the minimum number of retries can be increased via <code>ArithmeticConfig::set_retries</code>.</li>
+<li><strong>Optimized sampling:</strong>
+<ul>
+<li><strong>Ordering of weights:</strong> if the adversary can change the ordering of the weights such
+that the largest weights (most probable) weights are first under a certain condition,
+and the largest weights are last if that condition doesn't hold, then the adversary
+can use the time of normalized_sample to guess whether the condition holds.</li>
+<li><strong>Size of weights:</strong> if the adversary can change the size of the weights such that if
+a certain condition holds, the weight is more concentrated and if not the weight is less
+concentrated, then the adversary can use the time taken by normalized_sample as a signal
+for whether the condition holds.</li>
+<li><strong>Zero weight:</strong> optimized sampling also rejects immediately if a zero weight is encountered. 
+If the adversary can inject a zero weight at a particular position in the weights depending on
+a private condition, they can use the time it takes to return an error as a timing channel.</li>
+</ul>
+</li>
+</ul>
+<p>The timing channels for optimized sampling could be somewhat (but not completely) mitigated by 
+shuffling the weights prior to calling <code>normalized_sample</code>.</p>
+<h3 id="exact-arithmetic" class="section-header"><a href="#exact-arithmetic">Exact Arithmetic</a></h3>
+<p><code>normalized_sample</code> does not explicitly call <code>enter_exact_scope()</code> or
+<code>exit_exact_scope()</code>, and therefore preserves any <code>mpfr::flags</code> that
+are set before the function is called. </p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "b2dp";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Eta","Privacy parameter of the form `Eta = -z * log_2(x/2^y)` where `x < 2^y` and `x,y,z > 0`."]]});
