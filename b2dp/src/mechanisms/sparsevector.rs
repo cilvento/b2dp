@@ -60,8 +60,8 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
     // Check gamma and adjustments to ensure sufficient precision
     // `adjust_eta` also checks for validity of gamma and that
     // g_inv is integer. 
-    let mut g = Float::with_val(arithmetic_config.precision, gamma);
-    let mut g_inv = Float::with_val(arithmetic_config.precision, 1.0/gamma);
+    let mut g = arithmetic_config.get_float(gamma);
+    let mut g_inv = arithmetic_config.get_float(1.0/gamma);
     let _eta1_prime = adjust_eta(eta1, &g_inv, & mut arithmetic_config)?; 
     let _eta2_prime = adjust_eta(eta2, &g_inv, & mut arithmetic_config)?;
 
@@ -70,8 +70,8 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
         arithmetic_config.increase_precision(16)?; // increase precision
         arithmetic_config.inexact_arithmetic = false; // reset the inexact arithmetic flag on the configuration
         arithmetic_config.enter_exact_scope()?; // re-enter the exact scope, and try again
-        g = Float::with_val(arithmetic_config.precision, gamma);
-        g_inv = Float::with_val(arithmetic_config.precision, 1.0/gamma);
+        g = arithmetic_config.get_float(gamma);
+        g_inv = arithmetic_config.get_float(1.0/gamma);
         let _eta1_prime = adjust_eta(eta1, &g_inv, & mut arithmetic_config)?;
         let _eta2_prime = adjust_eta(eta2, &g_inv, & mut arithmetic_config)?;
     }
@@ -79,19 +79,19 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
     arithmetic_config.enter_exact_scope()?;
 
     // Check that w, Qmax, Qmin, etc are multiples of gamma
-    if !is_multiple_of(&Float::with_val(arithmetic_config.precision,w),&g) 
+    if !is_multiple_of(&arithmetic_config.get_float(w),&g) 
         { return Err("w is not an integer multiple of gamma."); }
-    if !is_multiple_of(&Float::with_val(arithmetic_config.precision,query_min),&g) 
+    if !is_multiple_of(&arithmetic_config.get_float(query_min),&g) 
         { return Err("query_min is not an integer multiple of gamma."); }
-    if !is_multiple_of(&Float::with_val(arithmetic_config.precision,query_max),&g) 
+    if !is_multiple_of(&arithmetic_config.get_float(query_max),&g) 
         { return Err("query_max is not an integer multiple of gamma."); }
     
 
     // Sample Rho
     let rho = sample_within_bounds(eta1,
-                                    Float::with_val(arithmetic_config.precision,&g),
-                                    Float::with_val(arithmetic_config.precision, query_min - w),
-                                    Float::with_val(arithmetic_config.precision, query_max + w),
+                                    &arithmetic_config.get_float(&g),
+                                    &arithmetic_config.get_float(query_min - w),
+                                    &arithmetic_config.get_float(query_max + w),
                                     &mut arithmetic_config,
                                     rng,
                                     optimize)?;
@@ -99,29 +99,29 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
     for i in 0..query_values.len() {
         // Clamp Q[i] if needed
         let mut q: Float;
-        if query_values[i] > query_max { q = Float::with_val(arithmetic_config.precision, query_max); }
-        else if query_values[i] < query_min { q = Float::with_val(arithmetic_config.precision, query_min); }
-        else { q = Float::with_val(arithmetic_config.precision, query_values[i]); }
+        if query_values[i] > query_max { q = arithmetic_config.get_float(query_max); }
+        else if query_values[i] < query_min { q = arithmetic_config.get_float(query_min); }
+        else { q = arithmetic_config.get_float(query_values[i]); }
         // Check that q is a multiple of gamma
         if !is_multiple_of(&q,&g) { 
             // Round
-            let mut m = Float::with_val(arithmetic_config.precision, &q/&g);
+            let mut m = arithmetic_config.get_float(&q/&g);
             m.round_mut(); 
-            q = Float::with_val(arithmetic_config.precision, &g*&m);
+            q = arithmetic_config.get_float(&g*&m);
         }
     
 
         // Compute rho hat
         let rho_hat: Float;
-        let rho_max = Float::with_val(arithmetic_config.precision, &q + w);
-        let rho_min = Float::with_val(arithmetic_config.precision, &q - w);
+        let rho_max = arithmetic_config.get_float(&q + w);
+        let rho_min = arithmetic_config.get_float(&q - w);
         if rho > rho_max { rho_hat = rho_max; }
         else if rho < rho_min {rho_hat = rho_min; } 
-        else { rho_hat = Float::with_val(arithmetic_config.precision, &rho); }
+        else { rho_hat = arithmetic_config.get_float(&rho); }
 
         // Run noisy threshold
-        let g_inv = Float::with_val(arithmetic_config.precision,1.0/gamma);
-        let a = noisy_threshold(eta2,& mut arithmetic_config,g_inv,rho_hat,rng,optimize)?;
+        let g_inv = arithmetic_config.get_float(1.0/gamma);
+        let a = noisy_threshold(eta2,& mut arithmetic_config,&g_inv,&rho_hat,rng,optimize)?;
         if a.is_infinite() && a.is_sign_positive() { 
             outputs.push(true); 
             count += 1;

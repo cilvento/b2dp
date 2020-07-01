@@ -58,14 +58,14 @@ impl WeightTable {
     {
         // If the value is already in the table, return it
         if let Some(w) = self.weights.get(&key) {
-            return Ok(Float::with_val(self.arithmetic_config.precision, w));
+            return Ok(self.arithmetic_config.get_float(w));
         };
 
         // If q is out of bounds, return weight 0
         if key.q > pb.upper[key.i] { 
-            let z = Float::with_val(self.arithmetic_config.precision, 0.0);
+            let z = self.arithmetic_config.get_float(0.0);
             self.weights.insert(key, z);
-            return Ok(Float::with_val(self.arithmetic_config.precision, 0.0)); 
+            return Ok(self.arithmetic_config.get_float(0.0)); 
         }
 
         // the i^th element in the target partition x, or a trailing zero if
@@ -78,12 +78,12 @@ impl WeightTable {
         // Check if q is the only option
         if pb.upper[key.i] == pb.lower[key.i] && pb.upper[key.i] == key.q {
             // Weight of 1 if q is the only option
-            let o = Float::with_val(self.arithmetic_config.precision, 1.0);
+            let o = self.arithmetic_config.get_float(1.0);
             self.weights.insert(key, o);
-            return Ok(Float::with_val(self.arithmetic_config.precision, 1.0));
+            return Ok(self.arithmetic_config.get_float(1.0));
         }
 
-        let mut val = Float::with_val(self.arithmetic_config.precision, 0.0);
+        let mut val = self.arithmetic_config.get_float(0.0);
 
 
         // Optimized case
@@ -140,7 +140,7 @@ impl WeightTable {
                 qprime += 1;
             }
         }
-        let result = Float::with_val(self.arithmetic_config.precision, &val);
+        let result = self.arithmetic_config.get_float(&val);
         self.weights.insert(key, val);
 
         return Ok(result);
@@ -299,7 +299,7 @@ impl WeightTable {
         // Compute Bias
         let mut b: Vec<f64> = Vec::new();
         for i in 0..pb.upper.len(){
-            let mut bi = Float::with_val(self.arithmetic_config.precision, 0);
+            let mut bi = self.arithmetic_config.get_float(0);
             for q in pb.lower[i]..pb.upper[i] {
                 let k = Key { q, i };
                 let p = self.get_probability(k, pb).unwrap();
@@ -320,11 +320,11 @@ impl WeightTable {
     {
         // Check if already computed
         if self.probabilities.contains_key(&k) {
-            return Ok(Float::with_val(self.arithmetic_config.precision,self.probabilities.get(&k).unwrap()));
+            return Ok(self.arithmetic_config.get_float(self.probabilities.get(&k).unwrap()));
         }
         // Check if in bounds
         if k.q > pb.upper[k.i] || k.q < pb.lower[k.i] {
-            let p = Float::with_val(self.arithmetic_config.precision,0);
+            let p = self.arithmetic_config.get_float(0);
             self.probabilities.insert(k, Float::with_val(p.prec(), &p));
             return Ok(p);
         }
@@ -334,11 +334,11 @@ impl WeightTable {
             let ku = Key { i: k.i, q: pb.upper[k.i] };
             let tau_u_i = self.get_total_weight(ku, pb);
             let mut w = self.weights.get(&k);
-            let z = Float::with_val(self.arithmetic_config.precision,0);
+            let z = self.arithmetic_config.get_float(0);
             if w.is_none() { // This shouldn't ever happen
                 w = Some(&z);
             }
-            let p = Float::with_val(self.arithmetic_config.precision, w.unwrap()/tau_u_i);
+            let p = self.arithmetic_config.get_float(w.unwrap()/tau_u_i);
             self.probabilities.insert(k, Float::with_val(p.prec(), &p));
             return Ok(p);
         }
@@ -358,11 +358,11 @@ impl WeightTable {
     {
         // Check if already computed 
         if self.coefficients.contains_key(&k){
-            return Ok(Float::with_val(self.arithmetic_config.precision,self.coefficients.get(&k).unwrap()));
+            return Ok(self.arithmetic_config.get_float(self.coefficients.get(&k).unwrap()));
         }
         // If k.q is out of bounds, no valid completions so coefficient is zero
-        if k.q < pb.lower[k.i] { return Ok(Float::with_val(self.arithmetic_config.precision, 0)); }
-        if k.i > 0 && k.q > pb.upper[k.i-1] { return Ok(Float::with_val(self.arithmetic_config.precision, 0)); }
+        if k.q < pb.lower[k.i] { return Ok(self.arithmetic_config.get_float(0)); }
+        if k.i > 0 && k.q > pb.upper[k.i-1] { return Ok(self.arithmetic_config.get_float(0)); }
 
         // Base Case: k.q = upper[k.i-1]
         if k.q == pb.upper[k.i - 1] {
@@ -370,7 +370,7 @@ impl WeightTable {
             let km1 = Key { i: k.i-1, q: pb.upper[k.i-1] };
             let p = self.get_probability(km1, pb)?;
             let c_qi = Float::with_val(p.prec(), p/t);
-            self.coefficients.insert(k, Float::with_val(self.arithmetic_config.precision, &c_qi));
+            self.coefficients.insert(k, self.arithmetic_config.get_float(&c_qi));
             return Ok(c_qi);
         }
 
@@ -384,7 +384,7 @@ impl WeightTable {
 
         let p_t = Float::with_val(p.prec(), p/t);
         let c_qi = Float::with_val(p_t.prec(), c_q1 + p_t);
-        self.coefficients.insert(k, Float::with_val(self.arithmetic_config.precision, &c_qi));
+        self.coefficients.insert(k, self.arithmetic_config.get_float(&c_qi));
         Ok(c_qi)
     }
 
@@ -397,12 +397,12 @@ impl WeightTable {
         if k.q > pb.upper[k.i] { 
             let kmax = Key { i: k.i, q: pb.upper[k.i] };
             let wmax = self.total_weights.get(&kmax).unwrap();
-            return Float::with_val(self.arithmetic_config.precision,wmax); 
+            return self.arithmetic_config.get_float(wmax); 
         }
 
-        if k.q < pb.lower[k.i] { return Float::with_val(self.arithmetic_config.precision,0); }
+        if k.q < pb.lower[k.i] { return self.arithmetic_config.get_float(0); }
         if !self.total_weights.contains_key(&k) {self.compute_total_weight(k.i, pb);}
-        return Float::with_val(self.arithmetic_config.precision, self.total_weights.get(&k).unwrap());
+        return self.arithmetic_config.get_float(self.total_weights.get(&k).unwrap());
     }
     /// Compute the total weight (\tau_{T,i}) of all elements in [lower_bound(i), T]
     /// for index i
@@ -412,15 +412,15 @@ impl WeightTable {
         let mut k = Key {q: pb.lower[i], i};
         let starting_weight = self.weights.get(&k);
         if starting_weight.is_none() {}
-        let mut tau = Float::with_val(self.arithmetic_config.precision,0);
+        let mut tau = self.arithmetic_config.get_float(0);
 
         for j in pb.lower[k.i]..pb.upper[k.i]+1 {
             k = Key { q:j, i };
             let next_weight = self.weights.get(&k);
-            if next_weight.is_none() { self.total_weights.insert(k, Float::with_val(self.arithmetic_config.precision, 0)); }
+            if next_weight.is_none() { self.total_weights.insert(k, self.arithmetic_config.get_float(0)); }
             else {
-                let next_total = Float::with_val(self.arithmetic_config.precision, tau + next_weight.unwrap());
-                tau = Float::with_val(self.arithmetic_config.precision, &next_total);
+                let next_total = self.arithmetic_config.get_float(tau + next_weight.unwrap());
+                tau = self.arithmetic_config.get_float(&next_total);
                 self.total_weights.insert(k,next_total);
             }
 

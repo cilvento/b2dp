@@ -3,7 +3,7 @@
 //! Differential Privacy, based on [Ilvento '19](https://arxiv.org/abs/1912.04222).
 //! 
 //! **Status:** active development, reference implementation only. Not 
-//! intended for uses other than research.
+//! intended for uses other than research. Subject to change without notice.
 //! 
 //! ## Background
 //! Although the exponential mechanism does not directly reveal the result of inexact
@@ -118,7 +118,7 @@
 //! let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
 //! let threshold = Float::with_val(arithmeticconfig.precision, 0);
 //! arithmeticconfig.enter_exact_scope()?; 
-//! let s = noisy_threshold(eta, & mut arithmeticconfig, gamma_inv, threshold, rng, false)?;
+//! let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false)?;
 //! assert!(!s.is_finite()); // returns plus or minus infinity
 //! if s.is_sign_positive() { /* Greater than the threshold */ ;}
 //! else { /* Less than the threshold. */ ;}
@@ -143,7 +143,7 @@
 //! let wmin = Float::with_val(arithmeticconfig.precision, -5);
 //! let wmax = Float::with_val(arithmeticconfig.precision, 5);
 //! arithmeticconfig.enter_exact_scope()?;
-//! let s = sample_within_bounds(eta, gamma, wmin, wmax, & mut arithmeticconfig, rng,false)?;
+//! let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false)?;
 //! let b = arithmeticconfig.exit_exact_scope();
 //! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
 //! # Ok(())

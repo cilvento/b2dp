@@ -204,7 +204,9 @@ pub fn exponential_mechanism<T, R: ThreadRandGen + Copy, F: Fn(&T)->f64>
         else if u < exponential_config.utility_min as f64 {
             u = exponential_config.utility_min as f64;
         }
-        utilities.push(randomized_round(u, & mut exponential_config.arithmetic_config, rng));
+        utilities.push(randomized_round(u, 
+                                        & mut exponential_config.arithmetic_config, 
+                                        rng));
     }
 
     // Enter exact scope
@@ -216,12 +218,15 @@ pub fn exponential_mechanism<T, R: ThreadRandGen + Copy, F: Fn(&T)->f64>
     // Generate weights vector
     let mut weights = Vec::new();
     for u in utilities.iter() {
-        let w = Float::with_val(exponential_config.arithmetic_config.precision, base.pow(u));
+        let w = exponential_config.arithmetic_config.get_float(base.pow(u));
         weights.push(w);
     }
 
     // Sample
-    let sample_index = normalized_sample(&weights, & mut exponential_config.arithmetic_config, rng, options.optimized_sample)?;
+    let sample_index = normalized_sample(&weights, 
+                                         & mut exponential_config.arithmetic_config, 
+                                         rng, 
+                                         options.optimized_sample)?;
     let sample = &outcomes[sample_index];
 
     // Exit exact scope

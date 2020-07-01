@@ -3,7 +3,7 @@
 //! are exact.
 
 
-use rug::{ops::Pow, rand::ThreadRandGen, rand::ThreadRandState, Float};
+use rug::{ops::Pow, rand::ThreadRandGen, rand::ThreadRandState, Float, Assign};
 
 use super::params::Eta;
 use gmp_mpfr_sys::mpfr;
@@ -27,6 +27,7 @@ pub fn randomized_round<R: ThreadRandGen>(x: f64,
     let x_trunc = x.trunc() as i64;
     // Draw a random value
     let mut rand_state = ThreadRandState::new_custom(&mut rng);
+    //let rho = arithmetic_config.get_float(Float::random_bits(&mut rand_state));
     let rho = Float::with_val(
         arithmetic_config.precision,
         Float::random_bits(&mut rand_state),
@@ -44,12 +45,12 @@ fn get_power_bound(total_weight: &Float, arithmetic_config: &mut ArithmeticConfi
     if *total_weight > 1 {
         // increase `k` until `2^k >= total_weight`.
         let mut two_exp_k = Float::i_pow_u(2, k as u32);
-        while Float::with_val(arithmetic_config.precision, two_exp_k) < *total_weight {
+        while arithmetic_config.get_float( two_exp_k) < *total_weight {
             k += 1;
             two_exp_k = Float::i_pow_u(2, k as u32);
         }
     } else {
-        let mut w = Float::with_val(arithmetic_config.precision, total_weight);
+        let mut w = arithmetic_config.get_float( total_weight);
         while w <= 1 {
             k -= 1;
             w *= 2;
@@ -119,7 +120,7 @@ pub fn normalized_sample<R: ThreadRandGen>(
                                         ) -> Result<usize, &'static str> 
 {
     // Compute the total weight
-    let total_weight = Float::with_val(arithmetic_config.precision, Float::sum(weights.iter()));
+    let total_weight = arithmetic_config.get_float(Float::sum(weights.iter()));
     if total_weight == 0 { return Err("Total weight zero. Weights must be positive."); }
     let mut zero_weight: Option<()> = None;
 
@@ -135,44 +136,39 @@ pub fn normalized_sample<R: ThreadRandGen>(
     if zero_weight.is_some() {return Err("All weights must be positive.");}
     // Determine smallest `k` such that `2^k > total_weight`
     let k = get_power_bound(&total_weight, arithmetic_config);
-    // Initialize the random state
-    let mut rand_state = ThreadRandState::new_custom(&mut rng);
 
-    let mut t = Float::with_val(arithmetic_config.precision, &total_weight);
+    let mut t = arithmetic_config.get_float(&total_weight);
     let mut retries = 0;
 
     t += 1; // ensure that the initial `t` is larger than `total_weight`.
     while t >= total_weight || retries < arithmetic_config.retry_min {
-        let mut s = Float::with_val(
-            arithmetic_config.precision,
-            Float::random_bits(&mut rand_state),
-        );
+        let mut s = arithmetic_config.get_rand_float(&mut rng);
         // Multiply by 2^k to scale
-        let two_pow_k = Float::with_val(arithmetic_config.precision, Float::i_exp(1, k));
+        let two_pow_k = arithmetic_config.get_float(Float::i_exp(1, k));
         s = s * two_pow_k;
         // Assign to t if in bounds 
         if s < total_weight {
-            t = Float::with_val(arithmetic_config.precision, &s);
+            t = arithmetic_config.get_float(&s);
         }
         retries += 1; // increment retries
     }
     if t >= total_weight {return Err("Failed to produce t");}
-    let mut cumulative_weight = Float::with_val(arithmetic_config.precision, 0);
+    let mut cumulative_weight = arithmetic_config.get_float(0); 
     let mut index: Option<usize> = None;
 
     // Iterate through the weights until the cumulative weight is greater than or equal to `t`
     for i in 0..weights.len() {
-        let next_weight = Float::with_val(arithmetic_config.precision, &weights[i]);
+        let next_weight = arithmetic_config.get_float(&weights[i]);
         cumulative_weight += next_weight;
         if cumulative_weight > t {
             // This is the index to return
             if index.is_none() { 
                 // Check sufficient precision
-                let mut next_highest = Float::with_val(arithmetic_config.precision, &t);
+                let mut next_highest = arithmetic_config.get_float(&t);
                 next_highest.next_up(); 
                 if i < weights.len() - 1 {
-                    let next_weight = Float::with_val(arithmetic_config.precision, &weights[i+1]);
-                    let mut cumulative_next = Float::with_val(arithmetic_config.precision, &cumulative_weight);
+                    let next_weight = arithmetic_config.get_float(&weights[i+1]);
+                    let mut cumulative_next = arithmetic_config.get_float(&cumulative_weight);
                     cumulative_next = cumulative_next + next_weight;
                     if cumulative_next < next_highest {
                         return Err("Sampling precision insufficient");
@@ -440,6 +436,36 @@ impl ArithmeticConfig {
         self.exact_scope = false;
         return result;
     }
+
+    /// Get a Float with value `T` and precision `self.precision`.
+    /// This method avoid redudnant boilerplate code of the form
+    /// `let x = Float::with_val(arithmetic_config.precision,val)`.
+    /// 
+    /// ### Arguments
+    ///   * `val`: the value to assign
+    /// 
+    /// ### Returns
+    /// A `Float` with precision `self.precision` and value `val`. 
+    pub fn get_float<T>(&self, val: T) ->  Float
+        where Float: Assign<T>
+    {
+        Float::with_val(self.precision, val)
+    }
+
+    /// Get a Float with random bits from `rng` and precision `self.precision`.
+    /// 
+    /// ### Arguments
+    ///   * `rng`: Randomness source
+    /// 
+    /// ### Returns
+    /// A `Float` with precision `self.precision` and value of random bits
+    /// provided by `rng`. 
+    pub fn get_rand_float<R: ThreadRandGen>(&self, rng: &mut R) -> Float {
+        let mut f = Float::new(self.precision);
+        let mut rand_state = ThreadRandState::new_custom(rng);
+        f.assign(Float::random_bits(&mut rand_state));
+        f
+    }
 }
 #[cfg(test)]
 mod tests {
@@ -447,6 +473,22 @@ mod tests {
     use crate::utilities::randomness::GeneratorOpenSSL;
     use rug::{ops::Pow};
 
+    #[test]
+    fn test_get_float(){
+        let arithmetic_config = ArithmeticConfig::basic().unwrap();
+        let f = arithmetic_config.get_float(1.5);
+        assert_eq!(f,1.5);
+        assert_eq!(f.prec(),arithmetic_config.precision);
+    }
+    #[test]
+    fn test_get_random_float(){
+        let mut arithmetic_config = ArithmeticConfig::basic().unwrap();
+        assert!(arithmetic_config.increase_precision(1600).is_ok());
+        let mut rng = GeneratorOpenSSL {};
+        let rho = arithmetic_config.get_rand_float(&mut rng);
+        assert_eq!(rho.prec(), arithmetic_config.precision);
+        assert!(rho.prec() > 1600);
+    }
 
     #[test]
     fn test_all_zero_weight_sampling(){

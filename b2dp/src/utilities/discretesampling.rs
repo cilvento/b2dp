@@ -55,18 +55,18 @@ pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
 /// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
-/// let gamma = Float::with_val(arithmeticconfig.precision, 0.5);
-/// let wmin = Float::with_val(arithmeticconfig.precision, -5);
-/// let wmax = Float::with_val(arithmeticconfig.precision, 5);
+/// let gamma = arithmeticconfig.get_float(0.5);
+/// let wmin = arithmeticconfig.get_float(-5);
+/// let wmax = arithmeticconfig.get_float(5);
 /// arithmeticconfig.enter_exact_scope()?;
-/// let s = sample_within_bounds(eta, gamma, wmin, wmax, & mut arithmeticconfig, rng,false)?;
+/// let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false)?;
 /// let b = arithmeticconfig.exit_exact_scope();
 /// assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
 /// # Ok(())
 /// # }
 /// ```
-pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: Float, 
-                                                wmin: Float, wmax: Float, 
+pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float, 
+                                                wmin: &Float, wmax: &Float, 
                                                 arithmeticconfig: & mut ArithmeticConfig,
                                                 rng: R, optimize: bool)
     -> Result<Float,&'static str>
@@ -75,25 +75,27 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: Float,
     if wmax <= wmin { return Err("`wmin` must be strictly less than `wmax`."); }
     if !is_multiple_of(&wmin, &gamma) { return Err("`wmin` is not integer multiple of `gamma`."); }
     if !is_multiple_of(&wmax, &gamma) { return Err("`wmax` is not integer multiple of `gamma`."); }
-    let t_min = Float::with_val(arithmeticconfig.precision, &wmin/&gamma);
-    let t_max = Float::with_val(arithmeticconfig.precision, &wmax/&gamma);
+    let t_min = arithmeticconfig.get_float(wmin/gamma);
+    let t_max = arithmeticconfig.get_float(wmax/gamma);
 
     // Adjust eta
-    let gamma_inv = Float::with_val(arithmeticconfig.precision, 1/&gamma);
+    let gamma_inv = arithmeticconfig.get_float(1/gamma);
     let eta_prime = adjust_eta(eta, &gamma_inv, arithmeticconfig)?;
     let base = eta_prime.get_base(arithmeticconfig.precision)?;
+    let plus_infty = arithmeticconfig.get_float(Special::Infinity);
+    let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
 
     // Get the weights for each region
     let p_l = get_sum(&base, arithmeticconfig, 
-                        Float::with_val(arithmeticconfig.precision, Special::NegInfinity),
-                        Float::with_val(arithmeticconfig.precision,&t_min))?;
+                        &neg_infty,
+                        &t_min)?;
     let p_u = get_sum(&base, arithmeticconfig, 
-                        Float::with_val(arithmeticconfig.precision,&t_max),
-                        Float::with_val(arithmeticconfig.precision, Special::Infinity))?;
+                        &t_max,
+                        &plus_infty)?;
     let p_t = get_sum(&base, arithmeticconfig, 
-                        Float::with_val(arithmeticconfig.precision,Special::NegInfinity),
-                        Float::with_val(arithmeticconfig.precision, Special::Infinity))?;
-    let p_m = Float::with_val(arithmeticconfig.precision, p_t - &p_u - &p_l);
+                        &neg_infty,
+                        &plus_infty)?;
+    let p_m = arithmeticconfig.get_float(p_t - &p_u - &p_l);
     
     let region_weights: Vec<Float> = vec![p_l,p_u,p_m];
 
@@ -101,32 +103,32 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: Float,
     let r = normalized_sample(&region_weights,arithmeticconfig,rng,optimize)?;
 
     match r { 
-        0 => return Ok(Float::with_val(arithmeticconfig.precision, Special::NegInfinity)),  // lower region
-        1 => return Ok(Float::with_val(arithmeticconfig.precision, Special::Infinity)),     // upper region
+        0 => return Ok(arithmeticconfig.get_float(Special::NegInfinity)),  // lower region
+        1 => return Ok(arithmeticconfig.get_float(Special::Infinity)),     // upper region
         _=> (), // Must sample from the middle region 
     }
     // Sample from the middle region
     // Construct weights and outcome space
     let mut outcomes: Vec<Float> = Vec::new();
     let mut weights: Vec<Float> = Vec::new();
-    let mut k = Float::with_val(arithmeticconfig.precision, &wmin/&gamma);
+    let mut k = arithmeticconfig.get_float(wmin/gamma);
     k = k+1;// 
-    let mut o = Float::with_val(arithmeticconfig.precision, &k*&gamma);
+    let mut o = arithmeticconfig.get_float(&k*gamma);
 
-    while o < wmax {
+    while o < *wmax {
         // record the outcome and the weight
         outcomes.push(o);
-        let next_k = Float::with_val(arithmeticconfig.precision, &k+1);
-        let w = Float::with_val(arithmeticconfig.precision,(&base).pow(k.abs()));
+        let next_k = arithmeticconfig.get_float(&k+1);
+        let w = arithmeticconfig.get_float((&base).pow(k.abs()));
         weights.push(w);
         // increment k and update the outcome
         k = next_k;
-        o = Float::with_val(arithmeticconfig.precision, &k*&gamma);
+        o = arithmeticconfig.get_float(&k*gamma);
     } 
 
     // Sample
     let s = normalized_sample(&weights,arithmeticconfig,rng,optimize)?;
-    return Ok(Float::with_val(arithmeticconfig.precision,&outcomes[s]));
+    return Ok(arithmeticconfig.get_float(&outcomes[s]));
 }
 
 
@@ -149,14 +151,14 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 {
     // Check that gamma is valid for the given eta
     if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer."); }
-    let gamma = Float::with_val(arithmeticconfig.precision, 1.0/gamma_inv);
+    let gamma = arithmeticconfig.get_float(1.0/gamma_inv);
     // Check if eta.z is divisible by gamma_inv.
     let mut z_prime = eta.z; 
     let mut x_prime = eta.x;
     let mut y_prime = eta.y;
-    if Float::with_val(arithmeticconfig.precision,eta.z*&gamma).is_integer()
+    if arithmeticconfig.get_float(eta.z*&gamma).is_integer()
     {
-        let rootz = Float::with_val(arithmeticconfig.precision,eta.z*&gamma);
+        let rootz = arithmeticconfig.get_float(eta.z*&gamma);
         
         z_prime = rootz.to_integer().unwrap().to_u32().unwrap(); 
         // Leave x and y as is
@@ -164,13 +166,13 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
     else { 
         // Leave z as is
         // Check if x and y meet the critera
-        let fx = Float::with_val(arithmeticconfig.precision, eta.x);
-        let fy = Float::with_val(arithmeticconfig.precision, eta.y);
+        let fx = arithmeticconfig.get_float(eta.x);
+        let fy = arithmeticconfig.get_float(eta.y);
         
         if !is_multiple_of(&fy, &gamma) {return Err("Unable to adjust for gamma (y).");}
-        let rooty = Float::with_val(arithmeticconfig.precision,fy*&gamma);
+        let rooty = arithmeticconfig.get_float(fy*&gamma);
         
-        let rootx = Float::with_val(arithmeticconfig.precision,fx.pow(&gamma));
+        let rootx = arithmeticconfig.get_float(fx.pow(&gamma));
         if !rootx.is_integer() {return Err("Unable to adjust for gamma (x).");}
         
         x_prime = rootx.to_integer().unwrap().to_u32().unwrap(); // TODO: more elegant error handling
@@ -214,10 +216,10 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
-/// let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
-/// let threshold = Float::with_val(arithmeticconfig.precision, 0);
+/// let gamma_inv = arithmeticconfig.get_float(2);
+/// let threshold = arithmeticconfig.get_float(0);
 /// arithmeticconfig.enter_exact_scope()?; 
-/// let s = noisy_threshold(eta, & mut arithmeticconfig, gamma_inv, threshold, rng, false)?;
+/// let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false)?;
 /// assert!(!s.is_finite()); // returns plus or minus infinity
 /// if s.is_sign_positive() { /* Greater than the threshold */ ;}
 /// else { /* Less than the threshold. */ ;}
@@ -226,9 +228,12 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// # Ok(())
 /// # }
 /// ```
-pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut ArithmeticConfig, gamma_inv: Float, threshold: Float,
+pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut ArithmeticConfig, gamma_inv: &Float, threshold: &Float,
                         rng: R, optimize: bool) 
     -> Result<Float, &'static str> { 
+        // plus and minus infinity
+        let plus_infty = arithmeticconfig.get_float(Special::Infinity);
+        let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
 
         // Adjust eta to take gamma into account.
         let eta_prime = adjust_eta(eta, &gamma_inv, arithmeticconfig)?;
@@ -237,29 +242,29 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
         
         // Check that gamma is valid (integer reciprocal)
         if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer."); }
-        let gamma = Float::with_val(arithmeticconfig.precision, 1/&gamma_inv);
+        let gamma = arithmeticconfig.get_float(1/gamma_inv);
 
         // Check that threshold is integer multiple of gamma
         if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`."); }
-        let t = Float::with_val(arithmeticconfig.precision, &threshold*&gamma_inv); 
+        let t = arithmeticconfig.get_float(threshold*gamma_inv); 
 
         let p_top = get_sum(&base,
                             arithmeticconfig, 
-                            t, 
-                            Float::with_val(arithmeticconfig.precision,Special::Infinity))?;
+                            &t, 
+                            &plus_infty)?;
         let p_total = get_sum(&base,
                             arithmeticconfig, 
-                            Float::with_val(arithmeticconfig.precision,Special::NegInfinity), 
-                            Float::with_val(arithmeticconfig.precision,Special::Infinity))?;
-        let p_bot = Float::with_val(arithmeticconfig.precision, p_total - &p_top);
+                            &neg_infty, 
+                            &plus_infty)?;
+        let p_bot = arithmeticconfig.get_float(p_total - &p_top);
         let weights: Vec<Float> = vec![p_top,p_bot];
         let s = normalized_sample(&weights, arithmeticconfig,rng,optimize)?;
         
         if s == 0 {
-            return Ok(Float::with_val(arithmeticconfig.precision, Special::Infinity));
+            return Ok(arithmeticconfig.get_float(Special::Infinity));
         }
         else {
-            return Ok(Float::with_val(arithmeticconfig.precision, Special::NegInfinity));
+            return Ok(arithmeticconfig.get_float(Special::NegInfinity));
         }
     }
 
@@ -283,7 +288,7 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
 /// ## Timing channels
 /// The recursive calls to `get_sum` introduce a timing channel distinguishing whether
 /// `start` and `end` cross zero. 
-pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: Float, end: Float) 
+pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: &Float, end: &Float) 
     -> Result<Float,&'static str>
 {
     // Check ordering
@@ -303,75 +308,79 @@ pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: Float, 
         if end.is_infinite() && end.is_sign_positive() {
             // Full infinite sum 
             // = 0.5*(1+base)
-            let base_plus_one = Float::with_val(arithmeticconfig.precision, 1+base); 
-            return Ok(Float::with_val(arithmeticconfig.precision, 0.5 * base_plus_one));
+            let base_plus_one = arithmeticconfig.get_float(1+base); 
+            return Ok(arithmeticconfig.get_float(0.5 * base_plus_one));
         }
 
         // Half-open infinite sum
-        let m = Float::with_val(arithmeticconfig.precision, &end);
+        let m = arithmeticconfig.get_float(end);
         let abs_end = m.abs();
-        if end < 0 {
+        if *end < 0 {
             // Same sign
             // = 0.5 - 0.5*(1-base^(|end|)) 
-            let p = Float::with_val(arithmeticconfig.precision, base).pow(abs_end); // base^(|end|)
-            let s = Float::with_val(arithmeticconfig.precision, 0.5 - 0.5*(1-p));
+            let p = arithmeticconfig.get_float(base).pow(abs_end); // base^(|end|)
+            let s = arithmeticconfig.get_float(0.5 - 0.5*(1-p));
             return Ok(s);
         }
         else {
             // Different sign
             // = 0.5 + 0.5*base - 0.5*base^(|end| + 1)
-            let end_plus_one = Float::with_val(arithmeticconfig.precision, abs_end + 1);
-            let p = Float::with_val(arithmeticconfig.precision, base).pow(end_plus_one); // base^(|end|+1)
-            let half_base = Float::with_val(arithmeticconfig.precision, 0.5*base);
-            let s = Float::with_val(arithmeticconfig.precision, 0.5 + half_base - 0.5*p);
+            let end_plus_one = arithmeticconfig.get_float(abs_end + 1);
+            let p = arithmeticconfig.get_float(base).pow(end_plus_one); // base^(|end|+1)
+            let half_base = arithmeticconfig.get_float(0.5*base);
+            let s = arithmeticconfig.get_float(0.5 + half_base - 0.5*p);
             return Ok(s);
         }
 
     }
     // Half-open positive infinite sum
     else if end.is_infinite() && end.is_sign_positive() {
-        let m = Float::with_val(arithmeticconfig.precision, &start);
+        let m = arithmeticconfig.get_float(start);
         let abs_start = m.abs();
     
         // Half-open infinite sum
-        if start > 0 {
+        if *start > 0 {
             // Same sign
             // = 0.5 - 0.5*(1-base^(|start|))
-            let p = Float::with_val(arithmeticconfig.precision, base).pow(abs_start); // base^(|start|)
+            let p = arithmeticconfig.get_float(base).pow(abs_start); // base^(|start|)
            
             
-            let s = Float::with_val(arithmeticconfig.precision, 0.5 - 0.5*(1-p));
+            let s = arithmeticconfig.get_float(0.5 - 0.5*(1-p));
             return Ok(s);
         }
         else {
             // Different sign
             // = 0.5 + 0.5*base - 0.5*base^(|start| + 1)
-            let start_plus_one = Float::with_val(arithmeticconfig.precision, abs_start + 1);
+            let start_plus_one = arithmeticconfig.get_float(abs_start + 1);
            
-            let p = Float::with_val(arithmeticconfig.precision, base).pow(start_plus_one); // base^(|start|+1)
+            let p = arithmeticconfig.get_float(base).pow(start_plus_one); // base^(|start|+1)
            
-            let half_base = Float::with_val(arithmeticconfig.precision, 0.5*base);
-            let s = Float::with_val(arithmeticconfig.precision, 0.5 + half_base - 0.5*p);
+            let half_base = arithmeticconfig.get_float(0.5*base);
+            let s = arithmeticconfig.get_float(0.5 + half_base - 0.5*p);
             return Ok(s);
         }
     }
     
+    
     // Otherwise, finite sum, recurse 
     // = get_sum(-infinity,infinity) - get_sum(-infinity, start - 1) - get_sum(end + 1, infinity)
+    let plus_infty = arithmeticconfig.get_float(Special::Infinity);
+    let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
+    
     let total_sum = get_sum(base,
                             arithmeticconfig,
-                            Float::with_val(arithmeticconfig.precision, Special::NegInfinity),
-                            Float::with_val(arithmeticconfig.precision, Special::Infinity))?;
+                            &neg_infty,
+                            &plus_infty)?;
     let neg_sum = get_sum(base,
                             arithmeticconfig, 
-                            Float::with_val(arithmeticconfig.precision,Special::NegInfinity), 
-                            Float::with_val(arithmeticconfig.precision, &start-1))?;
+                            &neg_infty, 
+                            &arithmeticconfig.get_float(start-1))?;
     let pos_sum = get_sum(base,
                             arithmeticconfig,
-                            Float::with_val(arithmeticconfig.precision, &end+1), 
-                            Float::with_val(arithmeticconfig.precision,Special::Infinity))?;
+                            &arithmeticconfig.get_float(end+1), 
+                            &plus_infty)?;
     
-    let s = Float::with_val(arithmeticconfig.precision, total_sum - neg_sum - pos_sum);
+    let s = arithmeticconfig.get_float(total_sum - neg_sum - pos_sum);
     Ok(s)
 }
 
@@ -387,14 +396,14 @@ mod tests {
         let eta = Eta::new(1,1,2).unwrap();
         let rng = GeneratorOpenSSL {};
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma = Float::with_val(arithmeticconfig.precision, 0.5);
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 1/&gamma);
+        let gamma = arithmeticconfig.get_float(0.5);
+        let gamma_inv = arithmeticconfig.get_float(1/&gamma);
         let eta_prime = adjust_eta(eta, &gamma_inv, &mut arithmeticconfig);
         assert!(eta_prime.is_ok());
-        let wmin = Float::with_val(arithmeticconfig.precision, -5);
-        let wmax = Float::with_val(arithmeticconfig.precision, 5);
+        let wmin = arithmeticconfig.get_float(-5);
+        let wmax = arithmeticconfig.get_float(5);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = sample_within_bounds(eta, gamma, wmin, wmax, & mut arithmeticconfig, rng,false);
+        let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false);
         
         assert!(s.is_ok());
         let b = arithmeticconfig.exit_exact_scope();
@@ -405,14 +414,14 @@ mod tests {
         let eta = Eta::new(1,1,2).unwrap();
         let rng = GeneratorOpenSSL {};
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma = Float::with_val(arithmeticconfig.precision, 0.5);
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 1/&gamma);
+        let gamma = arithmeticconfig.get_float(0.5);
+        let gamma_inv = arithmeticconfig.get_float(1/&gamma);
         let eta_prime = adjust_eta(eta, &gamma_inv, &mut arithmeticconfig);
         assert!(eta_prime.is_ok());
-        let wmin = Float::with_val(arithmeticconfig.precision, -1);
-        let wmax = Float::with_val(arithmeticconfig.precision, 1);
+        let wmin = arithmeticconfig.get_float(-1);
+        let wmax = arithmeticconfig.get_float(1);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = sample_within_bounds(eta, gamma, wmin, wmax, & mut arithmeticconfig, rng,false);
+        let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false);
         
         assert!(s.is_ok());
         let b = arithmeticconfig.exit_exact_scope();
@@ -421,8 +430,8 @@ mod tests {
     #[test]
     fn test_remainder(){
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma = Float::with_val(arithmeticconfig.precision, 0.25);
-        let t = Float::with_val(arithmeticconfig.precision, 0.75);
+        let gamma = arithmeticconfig.get_float(0.25);
+        let t = arithmeticconfig.get_float(0.75);
         let _a = arithmeticconfig.enter_exact_scope();
         let r = t.remainder(&gamma);
         println!("{:?}", &r);
@@ -439,10 +448,10 @@ mod tests {
         let eta = Eta::new(1,1,2).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
         let rng = GeneratorOpenSSL {};
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
-        let threshold = Float::with_val(arithmeticconfig.precision, 0);
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let threshold = arithmeticconfig.get_float(0);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, gamma_inv, threshold, rng, false).unwrap();
+        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false).unwrap();
         assert!(!s.is_finite()); // should get plus or minus infinity
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -451,10 +460,10 @@ mod tests {
         let eta = Eta::new(1,1,2).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
         let rng = GeneratorOpenSSL {};
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
-        let threshold = Float::with_val(arithmeticconfig.precision, 0.3);
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let threshold = arithmeticconfig.get_float(0.3);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, gamma_inv, threshold, rng, false);
+        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
         assert!(s.is_err());
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -463,10 +472,10 @@ mod tests {
         let eta = Eta::new(1,1,1).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
         let rng = GeneratorOpenSSL {};
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
-        let threshold = Float::with_val(arithmeticconfig.precision, 0.3);
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let threshold = arithmeticconfig.get_float(0.3);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, gamma_inv, threshold, rng, false);
+        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
         assert!(s.is_err());
         let _b = arithmeticconfig.exit_exact_scope(); 
     }
@@ -477,21 +486,21 @@ mod tests {
         // Test case passes by modifying z
         let eta = Eta::new(1,1,2).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
+        let gamma_inv = arithmeticconfig.get_float(2);
         let eta_prime = adjust_eta(eta, &gamma_inv, & mut arithmeticconfig).unwrap();
         assert_eq!(eta_prime, Eta::new(1,1,1).unwrap());
 
         // Test case passes by modifying x and y
         let eta = Eta::new(1,2,1).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
+        let gamma_inv = arithmeticconfig.get_float(2);
         let eta_prime = adjust_eta(eta, &gamma_inv, & mut arithmeticconfig).unwrap();
         assert_eq!(eta_prime, Eta::new(1,1,1).unwrap());
 
         // Cannot be adjusted
         let eta = Eta::new(1,1,1).unwrap();
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
-        let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
+        let gamma_inv = arithmeticconfig.get_float(2);
         let eta_prime = adjust_eta(eta, &gamma_inv, & mut arithmeticconfig);
         assert!(eta_prime.is_err());
     }
@@ -502,28 +511,28 @@ mod tests {
         let arithmeticconfig = ArithmeticConfig::basic().unwrap();
 
         // base that is too large
-        let base = Float::with_val(arithmeticconfig.precision, 1.0);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 0), Float::with_val(32, 5));
+        let base = arithmeticconfig.get_float(1.0);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 0), &Float::with_val(32, 5));
         assert!(s.is_err());
 
         // start > end
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 5), Float::with_val(32, 0));
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 5), &Float::with_val(32, 0));
         assert!(s.is_err());
         
         // start = end
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 5), Float::with_val(32, 5));
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 5), &Float::with_val(32, 5));
         assert!(s.is_err());
 
         // infinite and equal but different precision
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(16, Special::NegInfinity));
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(16, Special::NegInfinity));
         assert!(s.is_err());
 
         // non-integer
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(16, 1.75));
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(16, 1.75));
         assert!(s.is_err());
 
     }
@@ -534,90 +543,90 @@ mod tests {
         let arithmeticconfig = ArithmeticConfig::basic().unwrap();
         // base = 0.5 
         // Complete infinite sum
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.75);
 
         // [0,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 0), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 0), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.5);
         
         // [-infinity, 0]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(32, 0)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, 0)).unwrap();
         assert_eq!(s,0.5);
 
         // [1,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 1), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.25);
 
         // [-1,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, -1), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -1), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.625);
 
         // [-infinity,-1]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity),Float::with_val(32, -1)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, -1)).unwrap();
         assert_eq!(s,0.25);
 
         // [-infinity,1]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity),Float::with_val(32, 1)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, 1)).unwrap();
         assert_eq!(s,0.625);
 
         // [1,5]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 1),Float::with_val(32, 5)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1),&Float::with_val(32, 5)).unwrap();
         assert_eq!(s,0.2421875);
 
         // [-5,5]
-        let base = Float::with_val(arithmeticconfig.precision, 0.5);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, -5),Float::with_val(32, 5)).unwrap();
+        let base = arithmeticconfig.get_float(0.5);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -5),&Float::with_val(32, 5)).unwrap();
         assert_eq!(s,0.734375);
 
 
         // base = 0.1 
         // Complete infinite sum
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.55);
 
         // [0,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 0), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 0), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.5);
         
         // [-infinity, 0]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity), Float::with_val(32, 0)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, 0)).unwrap();
         assert_eq!(s,0.5);
 
         // [1,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 1), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1), &Float::with_val(32, Special::Infinity)).unwrap();
         assert!(s.to_f64()-0.05 < 0.001); // result not exact, test case only
 
         // [-1,infinity]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, -1), Float::with_val(32, Special::Infinity)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -1), &Float::with_val(32, Special::Infinity)).unwrap();
         assert_eq!(s,0.545);
 
         // [-infinity,-1]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity),Float::with_val(32, -1)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, -1)).unwrap();
         assert!(s.to_f64()-0.05 < 0.001); // result not exact, test case only
 
         // [-infinity,1]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, Special::NegInfinity),Float::with_val(32, 1)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, 1)).unwrap();
         assert_eq!(s,0.545);
 
         // [1,5]
-        let base = Float::with_val(arithmeticconfig.precision, 0.1);
-        let s = get_sum(&base, &arithmeticconfig, Float::with_val(32, 1),Float::with_val(32, 5)).unwrap();
+        let base = arithmeticconfig.get_float(0.1);
+        let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1),&Float::with_val(32, 5)).unwrap();
         assert!(s.to_f64()- 0.499995< 0.001);// result not exact, test case only
 
 
@@ -629,10 +638,10 @@ mod tests {
         let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
         let a = arithmeticconfig.enter_exact_scope();
         assert!(a.is_ok());
-        let f = Float::with_val(arithmeticconfig.precision, Special::Infinity);
+        let f = arithmeticconfig.get_float(Special::Infinity);
         assert!(f.is_infinite());
         assert!(f.is_sign_positive());
-        let g = Float::with_val(arithmeticconfig.precision, Special::NegInfinity);
+        let g = arithmeticconfig.get_float(Special::NegInfinity);
         assert!(g.is_infinite());
         assert!(g.is_sign_negative());
         let b = arithmeticconfig.exit_exact_scope();

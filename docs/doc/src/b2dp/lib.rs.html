@@ -198,7 +198,7 @@
 <span class="doccomment">//! Differential Privacy, based on [Ilvento &#39;19](https://arxiv.org/abs/1912.04222).</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! **Status:** active development, reference implementation only. Not </span>
-<span class="doccomment">//! intended for uses other than research.</span>
+<span class="doccomment">//! intended for uses other than research. Subject to change without notice.</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ## Background</span>
 <span class="doccomment">//! Although the exponential mechanism does not directly reveal the result of inexact</span>
@@ -313,7 +313,7 @@
 <span class="doccomment">//! let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);</span>
 <span class="doccomment">//! let threshold = Float::with_val(arithmeticconfig.precision, 0);</span>
 <span class="doccomment">//! arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">//! let s = noisy_threshold(eta, &amp; mut arithmeticconfig, gamma_inv, threshold, rng, false)?;</span>
+<span class="doccomment">//! let s = noisy_threshold(eta, &amp; mut arithmeticconfig, &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
 <span class="doccomment">//! assert!(!s.is_finite()); // returns plus or minus infinity</span>
 <span class="doccomment">//! if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
 <span class="doccomment">//! else { /* Less than the threshold. */ ;}</span>
@@ -338,7 +338,7 @@
 <span class="doccomment">//! let wmin = Float::with_val(arithmeticconfig.precision, -5);</span>
 <span class="doccomment">//! let wmax = Float::with_val(arithmeticconfig.precision, 5);</span>
 <span class="doccomment">//! arithmeticconfig.enter_exact_scope()?;</span>
-<span class="doccomment">//! let s = sample_within_bounds(eta, gamma, wmin, wmax, &amp; mut arithmeticconfig, rng,false)?;</span>
+<span class="doccomment">//! let s = sample_within_bounds(eta, &amp;gamma, &amp;wmin, &amp;wmax, &amp; mut arithmeticconfig, rng,false)?;</span>
 <span class="doccomment">//! let b = arithmeticconfig.exit_exact_scope();</span>
 <span class="doccomment">//! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. </span>
 <span class="doccomment">//! # Ok(())</span>
