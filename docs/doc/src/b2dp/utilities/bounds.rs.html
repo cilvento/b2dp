@@ -457,6 +457,17 @@
 <span id="457">457</span>
 <span id="458">458</span>
 <span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Compute partition bounds for the integer partition exponential mechanism. </span>
 <span class="doccomment">//! Some of the bounds strategies are due to Blocki, Datta and Bonneau &#39;16, </span>
@@ -465,6 +476,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Eta</span>, <span class="ident">ExponentialOptions</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">mechanisms</span>::<span class="ident">laplace</span>::<span class="ident">clamped_laplace_mechanism</span>;
 <span class="kw">use</span> <span class="ident">rug</span>::{ <span class="ident">rand</span>::<span class="ident">ThreadRandGen</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">errors</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PartitionBoundOptions</span> {
@@ -513,13 +525,13 @@
     <span class="doccomment">/// Checks that the partition bounds are valid:</span>
     <span class="doccomment">///   * Upper bound always greater than or equal to lower bound</span>
     <span class="doccomment">///   * Terminating zeros</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(),<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
     {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">lower</span>.<span class="ident">len</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bound length mismatch.&quot;</span>); }
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">lower</span>.<span class="ident">len</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bound length mismatch.&quot;</span>.<span class="ident">into</span>()); }
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">upper</span>.<span class="ident">len</span>() {
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>[<span class="ident">i</span>] <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">lower</span>[<span class="ident">i</span>] { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bound inversion&quot;</span>); }
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>[<span class="ident">i</span>] <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">lower</span>[<span class="ident">i</span>] { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bound inversion&quot;</span>.<span class="ident">into</span>()); }
         }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>[<span class="self">self</span>.<span class="ident">upper</span>.<span class="ident">len</span>()<span class="op">-</span><span class="number">1</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unterminated bound&quot;</span>);}
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">upper</span>[<span class="self">self</span>.<span class="ident">upper</span>.<span class="ident">len</span>()<span class="op">-</span><span class="number">1</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unterminated bound&quot;</span>.<span class="ident">into</span>());}
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -530,7 +542,7 @@
     <span class="doccomment">///   * `total_count`: upper bound on the total count</span>
     <span class="doccomment">/// ## Returns </span>
     <span class="doccomment">/// A `PartitionBound` constructed via the naive formula.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">total_count</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">total_count</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span><span class="op">&gt;</span>
     {       
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">upper</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">total_count</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lower</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>;<span class="ident">total_count</span> <span class="op">+</span> <span class="number">1</span> <span class="kw">as</span> <span class="ident">usize</span>];
@@ -543,7 +555,12 @@
         <span class="comment">// Add terminating pair.</span>
         <span class="ident">upper</span>.<span class="ident">push</span>(<span class="number">0</span>);
 
-        <span class="kw">let</span> <span class="ident">pb</span> <span class="op">=</span> <span class="ident">PartitionBound</span> { <span class="ident">upper</span>, <span class="ident">lower</span>, <span class="ident">count</span>: <span class="ident">total_count</span>, <span class="ident">cells</span>: <span class="ident">total_count</span>, <span class="ident">sparsity_control</span>: <span class="bool-val">false</span> , <span class="ident">noisy_estimates</span>: <span class="prelude-val">None</span>};
+        <span class="kw">let</span> <span class="ident">pb</span> <span class="op">=</span> <span class="ident">PartitionBound</span> { <span class="ident">upper</span>, 
+                                  <span class="ident">lower</span>, 
+                                  <span class="ident">count</span>: <span class="ident">total_count</span>, 
+                                  <span class="ident">cells</span>: <span class="ident">total_count</span>, 
+                                  <span class="ident">sparsity_control</span>: <span class="bool-val">false</span>, 
+                                  <span class="ident">noisy_estimates</span>: <span class="prelude-val">None</span>};
 
         <span class="prelude-val">Ok</span>(<span class="ident">pb</span>)
     }
@@ -554,7 +571,7 @@
     <span class="doccomment">///   * `total_count`: the total size of the partition.</span>
     <span class="doccomment">///   * `total_cells`: (upper bound on) the total number of cells/length of the partition. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_cells</span>(<span class="ident">total_count</span>: <span class="ident">usize</span>, <span class="ident">total_cells</span>: <span class="ident">usize</span>) 
-           <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+           <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span><span class="op">&gt;</span>
     { 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">upper</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">total_cells</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lower</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>;<span class="ident">total_cells</span> <span class="op">+</span> <span class="number">1</span> <span class="kw">as</span> <span class="ident">usize</span>];
@@ -567,7 +584,12 @@
         <span class="comment">// Terminating pair</span>
         <span class="ident">upper</span>.<span class="ident">push</span>(<span class="number">0</span>);
 
-        <span class="kw">let</span> <span class="ident">pb</span> <span class="op">=</span> <span class="ident">PartitionBound</span> { <span class="ident">upper</span>, <span class="ident">lower</span>, <span class="ident">count</span>: <span class="ident">total_count</span>, <span class="ident">cells</span>: <span class="ident">total_cells</span>, <span class="ident">sparsity_control</span>: <span class="bool-val">false</span>, <span class="ident">noisy_estimates</span>: <span class="prelude-val">None</span> };
+        <span class="kw">let</span> <span class="ident">pb</span> <span class="op">=</span> <span class="ident">PartitionBound</span> { <span class="ident">upper</span>, 
+                                  <span class="ident">lower</span>, 
+                                  <span class="ident">count</span>: <span class="ident">total_count</span>, 
+                                  <span class="ident">cells</span>: <span class="ident">total_cells</span>, 
+                                  <span class="ident">sparsity_control</span>: <span class="bool-val">false</span>, 
+                                  <span class="ident">noisy_estimates</span>: <span class="prelude-val">None</span> };
 
         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">pb</span>); 
     }
@@ -639,7 +661,7 @@
     <span class="doccomment">/// * `total_count`: an upper bound on the total size of the partition</span>
     <span class="doccomment">/// * `total_cells`: an upper bound on the total number of cells</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_dist</span>(<span class="ident">d</span>: <span class="ident">usize</span>, <span class="ident">x</span>:<span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">total_count</span>: <span class="ident">usize</span>, <span class="ident">total_cells</span>: <span class="ident">usize</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span><span class="op">&gt;</span>
     {
         <span class="comment">// if x is longer than total_cells, truncate it</span>
         <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">x</span>;
@@ -693,9 +715,9 @@
     <span class="doccomment">/// which are ~centered on the provided reference `r` and include all integer partitions within </span>
     <span class="doccomment">/// the estimated noisy distance.  </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_reference</span>(<span class="ident">_total_count</span>: <span class="ident">usize</span>,  <span class="ident">_ref</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">_x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">_eta</span>: <span class="ident">Eta</span>)
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span><span class="op">&gt;</span>
     {
-        <span class="prelude-val">Err</span>(<span class="string">&quot;Not implemented&quot;</span>)
+        <span class="prelude-val">Err</span>(<span class="string">&quot;Not implemented&quot;</span>.<span class="ident">into</span>())
     }
 
     
@@ -729,12 +751,12 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_noisy_estimates</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span> <span class="op">+</span> <span class="ident">Copy</span><span class="op">&gt;</span>(<span class="ident">total_count</span>: <span class="ident">usize</span>, <span class="ident">total_cells</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">eta</span>: <span class="ident">Eta</span>, 
         <span class="ident">rng</span>: <span class="ident">R</span>, <span class="ident">options</span>: <span class="ident">PartitionBoundOptions</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PartitionBound</span><span class="op">&gt;</span>
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cells</span> <span class="op">=</span> <span class="ident">total_count</span>;
         <span class="comment">// Check that total_cells is valid</span>
         <span class="kw">if</span> <span class="ident">total_cells</span>.<span class="ident">is_some</span>() {<span class="ident">cells</span> <span class="op">=</span> <span class="ident">total_cells</span>.<span class="ident">unwrap</span>();}
-        <span class="kw">if</span> <span class="ident">cells</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cell count must be positive.&quot;</span>); }
+        <span class="kw">if</span> <span class="ident">cells</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cell count must be positive.&quot;</span>.<span class="ident">into</span>()); }
 
         <span class="comment">// If sparsity control is specified, get an estimate of the number of zeros</span>
         <span class="comment">// and adjust cells to the noisy number of non-zero cells plus padding</span>
@@ -805,7 +827,7 @@
             <span class="kw">if</span> <span class="ident">lower</span> <span class="op">&gt;</span> <span class="ident">pb_baseline</span>.<span class="ident">upper</span>[<span class="ident">i</span>] { <span class="ident">lower</span> <span class="op">=</span> <span class="ident">pb_baseline</span>.<span class="ident">upper</span>[<span class="ident">i</span>]; }
             <span class="kw">if</span> <span class="ident">upper</span> <span class="op">&gt;</span> <span class="ident">pb_baseline</span>.<span class="ident">upper</span>[<span class="ident">i</span>] { <span class="ident">upper</span> <span class="op">=</span> <span class="ident">pb_baseline</span>.<span class="ident">upper</span>[<span class="ident">i</span>]; }
             <span class="kw">if</span> <span class="ident">upper</span> <span class="op">&lt;</span> <span class="ident">pb_baseline</span>.<span class="ident">lower</span>[<span class="ident">i</span>] { <span class="ident">upper</span> <span class="op">=</span> <span class="ident">pb_baseline</span>.<span class="ident">lower</span>[<span class="ident">i</span>]; }
-            <span class="kw">if</span> <span class="ident">upper</span> <span class="op">&lt;</span> <span class="ident">lower</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bounds out of order.&quot;</span>); }
+            <span class="kw">if</span> <span class="ident">upper</span> <span class="op">&lt;</span> <span class="ident">lower</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Bounds out of order.&quot;</span>.<span class="ident">into</span>()); }
             <span class="ident">upper_bound</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">upper</span>;
             <span class="ident">lower_bound</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">lower</span>;
         }

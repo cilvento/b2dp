@@ -6,6 +6,7 @@ use std::cmp;
 use rug::{ops::Pow, Float};
 use crate::{Eta, utilities::exactarithmetic::ArithmeticConfig};
 use super::bounds::PartitionBound;
+use crate::errors::*;
 
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 pub struct Key {
@@ -54,7 +55,8 @@ impl WeightTable {
     /// Returns a Float representing the weight or an error if the weight could not
     /// be determined. Errors occur when calls are made without filling in the required
     /// dependent values in the table. 
-    fn comp_weights(& mut self, key: Key, x: &Vec<i64>, pb: &PartitionBound, eta: Eta) -> Result<Float, &'static str> 
+    fn comp_weights(& mut self, key: Key, x: &Vec<i64>, pb: &PartitionBound, eta: Eta) 
+        -> Result<Float>
     {
         // If the value is already in the table, return it
         if let Some(w) = self.weights.get(&key) {
@@ -98,7 +100,7 @@ impl WeightTable {
                 w = wt; 
             }
             else {
-                return Err("Missing prior value.");
+                return Err("Missing prior value.".into());
             }
 
             val = val + base.pow(deltaqi)*w;
@@ -113,7 +115,7 @@ impl WeightTable {
                     w = wt; 
                 }
                 else {
-                    return Err("Missing prior value.");
+                    return Err("Missing prior value.".into());
                 }
                 let base = eta.get_base(self.arithmetic_config.precision).unwrap();
                 val = val + base.pow((key.q - xi).abs())*w;
@@ -134,7 +136,7 @@ impl WeightTable {
                     w = wt; 
                 }
                 else {
-                    return Err("Missing prior value.");
+                    return Err("Missing prior value.".into());
                 }
                 val = val + base.pow((key.q - xi).abs())*w;
                 qprime += 1;
@@ -166,7 +168,7 @@ impl WeightTable {
     /// This method does not compute worst-case arithmetic up front, and instead increases
     /// precision as needed during computation. 
     pub fn from_bounds(eta: Eta, pb: &PartitionBound, x: &Vec<i64>) 
-            -> Result<WeightTable, &'static str>
+            -> Result<WeightTable>
     {
         // Check inputs
         pb.check()?;
@@ -226,7 +228,7 @@ impl WeightTable {
     /// beginning with value `q` at index `i`, with INTENTIONALLY INEXACT ARITHMETIC for 
     /// comparison and testing purposes only. 
     pub fn inexact_from_bounds(eta: Eta, pb: &PartitionBound, x: &Vec<i64>) 
-            -> Result<WeightTable, &'static str>
+            -> Result<WeightTable>
     {
         // Check inputs
         pb.check()?;
@@ -266,7 +268,7 @@ impl WeightTable {
     ///  ## Returns
     ///  A vector indicating the bias of each index if `x` were the target partition. 
     pub fn get_bias(& mut self, pb: &PartitionBound, x: &Vec<i64>) -> 
-        Result<Vec<f64>, &'static str>
+        Result<Vec<f64>>
     {
         pb.check()?;
         // Fill in the total_weights table
@@ -316,7 +318,7 @@ impl WeightTable {
     /// position k.i (P_{q,i}).
     /// TODO: fix messy unwraps
     fn get_probability(&mut self, k: Key, pb: &PartitionBound) 
-        -> Result<Float, &'static str> 
+        -> Result<Float>
     {
         // Check if already computed
         if self.probabilities.contains_key(&k) {
@@ -354,7 +356,7 @@ impl WeightTable {
 
     /// Get the coefficient (C_{T,i})
     fn get_coefficient(&mut self, k: Key, pb: &PartitionBound) 
-        -> Result<Float, &'static str> 
+        -> Result<Float>
     {
         // Check if already computed 
         if self.coefficients.contains_key(&k){

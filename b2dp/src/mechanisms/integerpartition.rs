@@ -4,6 +4,7 @@ use crate::{Eta,  normalized_sample, GeneratorOpenSSL};
 use crate::utilities::{bounds::PartitionBound, weights::WeightTable, weights::Key};
 use rug::{Float};
 use std::cmp;
+use crate::errors::*;
 
 #[derive(Debug, Clone, Copy)]
 pub struct IntegerPartitionOptions {
@@ -47,7 +48,7 @@ pub fn integer_partition_mechanism_with_weights(
     weight_table: & mut WeightTable,
     pb: &PartitionBound,
     options: IntegerPartitionOptions) 
-    -> Result< Vec<i64>, &'static str >
+    -> Result< Vec<i64>>
 {
     // Check parameters
     pb.check()?;
@@ -72,13 +73,13 @@ pub fn integer_partition_mechanism_with_weights(
                 let w = Float::with_val(weight_table.arithmetic_config.precision, wt);
                 weight_list.push(w); 
             }
-            else { return Err("Weight table missing value."); }
+            else { return Err("Weight table missing value.".into()); }
         }
         // Sample the next value
         let rng = GeneratorOpenSSL {};
         let sample = normalized_sample(&weight_list, & mut weight_table.arithmetic_config, rng, options.optimize)?;
         let y_i = pb.lower[i] + sample as i64;
-        if y_i > q_max { return Err("Bad sample"); } 
+        if y_i > q_max { return Err("Bad sample.".into()); } 
 
         // Add the next index to the output and update y_prev
         y.push(y_i); 
@@ -121,7 +122,7 @@ pub fn integer_partition_mechanism_with_bounds(eta: Eta,
     x: &Vec<i64>, 
     pb: &PartitionBound,
     options: IntegerPartitionOptions) 
-    -> Result< Vec<i64>, &'static str >
+    -> Result< Vec<i64>>
 {
     // Check parameters
     pb.check()?;
@@ -153,7 +154,7 @@ pub fn integer_partition_mechanism_with_bounds(eta: Eta,
                 let w = Float::with_val(weight_table.arithmetic_config.precision, wt);
                 weight_list.push(w); 
             }
-            else { return Err("Weight table missing value."); }
+            else { return Err("Weight table missing value.".into()); }
         }
 
         // Sample the next value
@@ -165,7 +166,7 @@ pub fn integer_partition_mechanism_with_bounds(eta: Eta,
             // weight_table.arithmetic_config.enter_exact_scope()?;
             // println!("{:?}: {:?}", i, weight_table.arithmetic_config);
         let y_i = pb.lower[i] + sample as i64;
-        if y_i > q_max { return Err("Bad sample"); } 
+        if y_i > q_max { return Err("Bad sample.".into()); } 
 
         // Add the next index to the output and update y_prev
         y.push(y_i); 

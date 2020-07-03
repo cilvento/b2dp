@@ -575,6 +575,8 @@
 <span id="575">575</span>
 <span id="576">576</span>
 <span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Compute weight tables via dynamic programming for the integer partition</span>
 <span class="doccomment">//! exponential mechanism. </span>
@@ -584,6 +586,7 @@
 <span class="kw">use</span> <span class="ident">rug</span>::{<span class="ident">ops</span>::<span class="ident">Pow</span>, <span class="ident">Float</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Eta</span>, <span class="ident">utilities</span>::<span class="ident">exactarithmetic</span>::<span class="ident">ArithmeticConfig</span>};
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">bounds</span>::<span class="ident">PartitionBound</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">errors</span>::<span class="kw-2">*</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Key</span> {
@@ -632,7 +635,8 @@
     <span class="doccomment">/// Returns a Float representing the weight or an error if the weight could not</span>
     <span class="doccomment">/// be determined. Errors occur when calls are made without filling in the required</span>
     <span class="doccomment">/// dependent values in the table. </span>
-    <span class="kw">fn</span> <span class="ident">comp_weights</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Key</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">eta</span>: <span class="ident">Eta</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+    <span class="kw">fn</span> <span class="ident">comp_weights</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Key</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">eta</span>: <span class="ident">Eta</span>) 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// If the value is already in the table, return it</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">w</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
@@ -676,7 +680,7 @@
                 <span class="ident">w</span> <span class="op">=</span> <span class="ident">wt</span>; 
             }
             <span class="kw">else</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>);
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>.<span class="ident">into</span>());
             }
 
             <span class="ident">val</span> <span class="op">=</span> <span class="ident">val</span> <span class="op">+</span> <span class="ident">base</span>.<span class="ident">pow</span>(<span class="ident">deltaqi</span>)<span class="kw-2">*</span><span class="ident">w</span>;
@@ -691,7 +695,7 @@
                     <span class="ident">w</span> <span class="op">=</span> <span class="ident">wt</span>; 
                 }
                 <span class="kw">else</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>.<span class="ident">into</span>());
                 }
                 <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">get_base</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>).<span class="ident">unwrap</span>();
                 <span class="ident">val</span> <span class="op">=</span> <span class="ident">val</span> <span class="op">+</span> <span class="ident">base</span>.<span class="ident">pow</span>((<span class="ident">key</span>.<span class="ident">q</span> <span class="op">-</span> <span class="ident">xi</span>).<span class="ident">abs</span>())<span class="kw-2">*</span><span class="ident">w</span>;
@@ -712,7 +716,7 @@
                     <span class="ident">w</span> <span class="op">=</span> <span class="ident">wt</span>; 
                 }
                 <span class="kw">else</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>.<span class="ident">into</span>());
                 }
                 <span class="ident">val</span> <span class="op">=</span> <span class="ident">val</span> <span class="op">+</span> <span class="ident">base</span>.<span class="ident">pow</span>((<span class="ident">key</span>.<span class="ident">q</span> <span class="op">-</span> <span class="ident">xi</span>).<span class="ident">abs</span>())<span class="kw-2">*</span><span class="ident">w</span>;
                 <span class="ident">qprime</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -744,7 +748,7 @@
     <span class="doccomment">/// This method does not compute worst-case arithmetic up front, and instead increases</span>
     <span class="doccomment">/// precision as needed during computation. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bounds</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) 
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check inputs</span>
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
@@ -804,7 +808,7 @@
     <span class="doccomment">/// beginning with value `q` at index `i`, with INTENTIONALLY INEXACT ARITHMETIC for </span>
     <span class="doccomment">/// comparison and testing purposes only. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inexact_from_bounds</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) 
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check inputs</span>
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
@@ -844,7 +848,7 @@
     <span class="doccomment">///  ## Returns</span>
     <span class="doccomment">///  A vector indicating the bias of each index if `x` were the target partition. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bias</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> 
-        <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+        <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span>
     {
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
         <span class="comment">// Fill in the total_weights table</span>
@@ -894,7 +898,7 @@
     <span class="doccomment">/// position k.i (P_{q,i}).</span>
     <span class="doccomment">/// TODO: fix messy unwraps</span>
     <span class="kw">fn</span> <span class="ident">get_probability</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Key</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check if already computed</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">probabilities</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>) {
@@ -932,7 +936,7 @@
 
     <span class="doccomment">/// Get the coefficient (C_{T,i})</span>
     <span class="kw">fn</span> <span class="ident">get_coefficient</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Key</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check if already computed </span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">coefficients</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>){

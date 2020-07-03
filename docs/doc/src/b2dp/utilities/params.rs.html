@@ -224,6 +224,18 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements the base-2 privacy parameter `eta`, which takes the form</span>
 <span class="doccomment">//! `eta = -z * log_2(x/2^y)` for positive integer `x`, `y`, `z` where</span>
@@ -231,6 +243,7 @@
 
 
 <span class="kw">use</span> <span class="ident">rug</span>::{<span class="ident">Float</span>, <span class="ident">ops</span>::<span class="ident">Pow</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">errors</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Privacy parameter of the form `Eta = -z * log_2(x/2^y)` where</span>
 <span class="doccomment">/// `x &lt; 2^y` and `x,y,z &gt; 0`.</span>
@@ -258,7 +271,9 @@
     <span class="doccomment">/// on failure.</span>
     <span class="doccomment">/// ## Errors</span>
     <span class="doccomment">/// Returns `Err` if `x`, `y`, or `z` do not meet the requirements.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">u32</span>, <span class="ident">y</span>: <span class="ident">u32</span>, <span class="ident">z</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Eta</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">x</span>: <span class="ident">u32</span>, <span class="ident">y</span>: <span class="ident">u32</span>, <span class="ident">z</span>: <span class="ident">u32</span>) 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Eta</span><span class="op">&gt;</span>
+    {
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">Eta</span> {<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>};
         <span class="ident">eta</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">eta</span>)
@@ -272,7 +287,8 @@
     <span class="doccomment">/// `Result&lt;Eta,&amp;str&gt;` with the created `Eta` on sucess or an error string</span>
     <span class="doccomment">/// on failure. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_epsilon</span>(<span class="ident">epsilon</span>: <span class="ident">f64</span>) 
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Eta</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Eta</span><span class="op">&gt;</span>
+    {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">x</span> <span class="op">=</span> <span class="number">3</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">y</span> <span class="op">=</span> <span class="number">2</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">z</span> <span class="op">=</span> <span class="number">1</span>;
@@ -299,21 +315,23 @@
 <span class="comment">// Methods</span>
 <span class="kw">impl</span> <span class="ident">Eta</span> {
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+    {
         <span class="comment">// Check all parameters nonzero</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;x must be nonzero&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;x must be nonzero&quot;</span>.<span class="ident">into</span>());
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">y</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;y must be nonzero&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;y must be nonzero&quot;</span>.<span class="ident">into</span>());
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">z</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;z must be nonzero&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;z must be nonzero&quot;</span>.<span class="ident">into</span>());
         }
 
         <span class="comment">// Check x &lt; 2^y</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">x</span> <span class="op">&gt;</span> <span class="number">2u32</span>.<span class="ident">pow</span>(<span class="self">self</span>.<span class="ident">y</span>) <span class="op">-</span> <span class="number">1</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;x &gt; 2^y - 1&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;x &gt; 2^y - 1&quot;</span>.<span class="ident">into</span>());
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -335,7 +353,9 @@
     <span class="doccomment">/// `2^(-eta.z * log_2(eta.x /2^(eta.y)))` or an error.</span>
     <span class="doccomment">/// ## Errors</span>
     <span class="doccomment">/// Returns an error if the `check()` method fails, i.e. not properly initialized.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">precision</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">precision</span>: <span class="ident">u32</span>) 
+        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
+    {
         <span class="self">self</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">i_exp</span>(<span class="self">self</span>.<span class="ident">x</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="op">-</span> (<span class="self">self</span>.<span class="ident">y</span> <span class="kw">as</span> <span class="ident">i32</span>));
         <span class="kw">let</span> <span class="ident">x_2_pow_neg_y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">precision</span>, <span class="ident">v</span>);
@@ -413,32 +433,36 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_zero_x</span>() {
         <span class="kw">let</span> <span class="ident">bad_x</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bad_x</span>.<span class="ident">unwrap_err</span>(), <span class="string">&quot;x must be nonzero&quot;</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bad_x</span>.<span class="ident">is_err</span>());
     }
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_zero_y</span>() {
         <span class="kw">let</span> <span class="ident">bad_y</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bad_y</span>.<span class="ident">unwrap_err</span>(), <span class="string">&quot;y must be nonzero&quot;</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bad_y</span>.<span class="ident">is_err</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_zero_z</span>() {
         <span class="kw">let</span> <span class="ident">bad_z</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bad_z</span>.<span class="ident">unwrap_err</span>(), <span class="string">&quot;z must be nonzero&quot;</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bad_z</span>.<span class="ident">is_err</span>());
     }
 
     <span class="doccomment">/// Tests condition on x and y</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_x_and_y_sizes</span>() {
         <span class="kw">let</span> <span class="ident">bad_x</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">bad_x</span>.<span class="ident">unwrap_err</span>(), <span class="string">&quot;x &gt; 2^y - 1&quot;</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bad_x</span>.<span class="ident">is_err</span>());
     }
 
     <span class="doccomment">/// Successfully creates a good Eta</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_eta_creation</span>() {
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">Eta</span> { <span class="ident">x</span>: <span class="number">3</span>, <span class="ident">y</span>: <span class="number">2</span>, <span class="ident">z</span>: <span class="number">1</span> }), <span class="ident">eta</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">eta</span>.<span class="ident">is_ok</span>());
+        <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">eta</span>.<span class="ident">x</span>, <span class="number">3</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">eta</span>.<span class="ident">y</span>, <span class="number">2</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">eta</span>.<span class="ident">z</span>, <span class="number">1</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

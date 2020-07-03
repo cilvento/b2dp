@@ -4,7 +4,7 @@ use rug::{Float, rand::ThreadRandGen};
 use crate::utilities::exactarithmetic::{ArithmeticConfig};
 use crate::utilities::params::Eta;
 use crate::utilities::discretesampling::{sample_within_bounds, noisy_threshold, adjust_eta, is_multiple_of};
-
+use crate::errors::*;
 
 /// The sparse vector mechanism
 /// Sensitivity (Delta) is assumed to be 1. Privacy parameters must be scaled 
@@ -47,7 +47,7 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
                                             query_min: f64, query_max: f64, 
                                             w: f64, rng: R,
                                             optimize: bool)
-    -> Result<Vec<bool>, &'static str>
+    -> Result<Vec<bool>>
 {
     // Initialize output vector
     let mut outputs: Vec<bool> = Vec::new();
@@ -80,11 +80,11 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
 
     // Check that w, Qmax, Qmin, etc are multiples of gamma
     if !is_multiple_of(&arithmetic_config.get_float(w),&g) 
-        { return Err("w is not an integer multiple of gamma."); }
+        { return Err("w is not an integer multiple of gamma.".into()); }
     if !is_multiple_of(&arithmetic_config.get_float(query_min),&g) 
-        { return Err("query_min is not an integer multiple of gamma."); }
+        { return Err("query_min is not an integer multiple of gamma.".into()); }
     if !is_multiple_of(&arithmetic_config.get_float(query_max),&g) 
-        { return Err("query_max is not an integer multiple of gamma."); }
+        { return Err("query_max is not an integer multiple of gamma.".into()); }
     
 
     // Sample Rho

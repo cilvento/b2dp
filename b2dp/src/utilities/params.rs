@@ -4,6 +4,7 @@
 
 
 use rug::{Float, ops::Pow};
+use crate::errors::*;
 
 /// Privacy parameter of the form `Eta = -z * log_2(x/2^y)` where
 /// `x < 2^y` and `x,y,z > 0`.
@@ -31,7 +32,9 @@ impl Eta {
     /// on failure.
     /// ## Errors
     /// Returns `Err` if `x`, `y`, or `z` do not meet the requirements.
-    pub fn new(x: u32, y: u32, z: u32) -> Result<Eta, &'static str> {
+    pub fn new(x: u32, y: u32, z: u32) 
+        -> Result<Eta>
+    {
         let eta = Eta {x, y, z};
         eta.check()?;
         Ok(eta)
@@ -45,7 +48,8 @@ impl Eta {
     /// `Result<Eta,&str>` with the created `Eta` on sucess or an error string
     /// on failure. 
     pub fn from_epsilon(epsilon: f64) 
-            -> Result<Eta, &'static str> {
+            -> Result<Eta>
+    {
         let mut x = 3;
         let mut y = 2;
         let mut z = 1;
@@ -72,21 +76,23 @@ impl Eta {
 // Methods
 impl Eta {
 
-    pub fn check(&self) -> Result<(), &'static str> {
+    pub fn check(&self) 
+        -> Result<()>
+    {
         // Check all parameters nonzero
         if self.x == 0 {
-            return Err("x must be nonzero");
+            return Err("x must be nonzero".into());
         }
         if self.y == 0 {
-            return Err("y must be nonzero");
+            return Err("y must be nonzero".into());
         }
         if self.z == 0 {
-            return Err("z must be nonzero");
+            return Err("z must be nonzero".into());
         }
 
         // Check x < 2^y
         if self.x > 2u32.pow(self.y) - 1 {
-            return Err("x > 2^y - 1");
+            return Err("x > 2^y - 1".into());
         }
         Ok(())
     }
@@ -108,7 +114,9 @@ impl Eta {
     /// `2^(-eta.z * log_2(eta.x /2^(eta.y)))` or an error.
     /// ## Errors
     /// Returns an error if the `check()` method fails, i.e. not properly initialized.
-    pub fn get_base(&self, precision: u32) -> Result<Float, &'static str> {
+    pub fn get_base(&self, precision: u32) 
+        -> Result<Float>
+    {
         self.check()?;
         let v = Float::i_exp(self.x as i32, - (self.y as i32));
         let x_2_pow_neg_y = Float::with_val(precision, v);
@@ -186,32 +194,36 @@ mod tests {
     #[test]
     fn test_zero_x() {
         let bad_x = Eta::new(0, 1, 2);
-        assert_eq!(bad_x.unwrap_err(), "x must be nonzero");
+        assert!(bad_x.is_err());
     }
     #[test]
     fn test_zero_y() {
         let bad_y = Eta::new(1, 0, 2);
-        assert_eq!(bad_y.unwrap_err(), "y must be nonzero");
+        assert!(bad_y.is_err());
     }
 
     #[test]
     fn test_zero_z() {
         let bad_z = Eta::new(1, 1, 0);
-        assert_eq!(bad_z.unwrap_err(), "z must be nonzero");
+        assert!(bad_z.is_err());
     }
 
     /// Tests condition on x and y
     #[test]
     fn test_x_and_y_sizes() {
         let bad_x = Eta::new(3, 1, 1);
-        assert_eq!(bad_x.unwrap_err(), "x > 2^y - 1");
+        assert!(bad_x.is_err());
     }
 
     /// Successfully creates a good Eta
     #[test]
     fn test_eta_creation() {
         let eta = Eta::new(3, 2, 1);
-        assert_eq!(Ok(Eta { x: 3, y: 2, z: 1 }), eta);
+        assert!(eta.is_ok());
+        let eta = eta.unwrap();
+        assert_eq!(eta.x, 3);
+        assert_eq!(eta.y, 2);
+        assert_eq!(eta.z, 1);
     }
 
     #[test]

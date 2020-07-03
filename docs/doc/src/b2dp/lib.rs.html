@@ -192,6 +192,27 @@
 <span id="192">192</span>
 <span id="193">193</span>
 <span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # Base-2 Differential Privacy Crate</span>
 <span class="doccomment">//! Implements the exponential mechanism and other utilities for base-2 </span>
@@ -228,20 +249,23 @@
 <span class="doccomment">//! **Converting a base-e parameter to base-2**</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use b2dp::Eta;</span>
+<span class="doccomment">//! # use b2dp::errors::*;</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! let epsilon = 1.25;</span>
-<span class="doccomment">//! let eta = Eta::from_epsilon(epsilon).unwrap();</span>
+<span class="doccomment">//! let eta = Eta::from_epsilon(epsilon)?;</span>
+<span class="doccomment">//! # Ok(()) }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! **Running the exponential mechanism**</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! Run the exponential mechanism with utility function `utility_fn`.</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL};</span>
+<span class="doccomment">//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};</span>
 <span class="doccomment">//! </span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! fn util_fn (x: &amp;u32) -&gt; f64 {</span>
 <span class="doccomment">//!     return ((*x as f64)-0.0).abs();</span>
 <span class="doccomment">//! }</span>
-<span class="doccomment">//! let eta = Eta::new(1,1,1).unwrap(); // Construct a privacy parameter</span>
+<span class="doccomment">//! let eta = Eta::new(1,1,1)?; // Construct a privacy parameter</span>
 <span class="doccomment">//! let utility_min = 0; // Set bounds on the utility and outcomes</span>
 <span class="doccomment">//! let utility_max = 10;</span>
 <span class="doccomment">//! let max_outcomes = 10;</span>
@@ -251,7 +275,7 @@
 <span class="doccomment">//!                                     utility_min, utility_max, </span>
 <span class="doccomment">//!                                     max_outcomes,</span>
 <span class="doccomment">//!                                     rng, </span>
-<span class="doccomment">//!                                     Default::default()).unwrap();</span>
+<span class="doccomment">//!                                     Default::default())?;</span>
 <span class="doccomment">//! # Ok(()) </span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -260,8 +284,8 @@
 <span class="doccomment">//! implementation is `2*alpha*ln(2)*eta` base-e DP. To explicitly scale by `alpha`</span>
 <span class="doccomment">//! the caller can either modify the `eta` used or the utility function.</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL};</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
+<span class="doccomment">//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! // Scale the privacy parameter to account for the utility sensitivity</span>
 <span class="doccomment">//! let epsilon = 1.25;</span>
 <span class="doccomment">//! let eta = Eta::from_epsilon(epsilon)?;</span>
@@ -282,11 +306,11 @@
 <span class="doccomment">//! `true` or `false` depending on whether each query exceeds the fixed threshold of `0`. </span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector};</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector, errors::*};</span>
 <span class="doccomment">//! # use rug::Float;</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
-<span class="doccomment">//! let eta1 = Eta::new(1,1,2).unwrap();</span>
-<span class="doccomment">//! let eta2 = Eta::new(1,1,2).unwrap();</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
+<span class="doccomment">//! let eta1 = Eta::new(1,1,2)?;</span>
+<span class="doccomment">//! let eta2 = Eta::new(1,1,2)?;</span>
 <span class="doccomment">//! let c = 2;</span>
 <span class="doccomment">//! let queries = vec![1.0,2.0,3.0,4.0,5.0,1.0];</span>
 <span class="doccomment">//! let gamma = 0.5;</span>
@@ -304,9 +328,9 @@
 <span class="doccomment">//! centered at `0` with granularity `gamma` exceeds the given `threshold`. </span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold, errors::*};</span>
 <span class="doccomment">//! # use rug::Float;</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! let eta = Eta::new(1,1,2)?; // can be adjusted for the desired value of gamma.</span>
 <span class="doccomment">//! let mut arithmeticconfig = ArithmeticConfig::basic()?;</span>
 <span class="doccomment">//! let rng = GeneratorOpenSSL {};</span>
@@ -328,9 +352,9 @@
 <span class="doccomment">//! the bound.</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds, errors::*};</span>
 <span class="doccomment">//! # use rug::Float;</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! # let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.</span>
 <span class="doccomment">//! # let mut arithmeticconfig = ArithmeticConfig::basic()?;</span>
 <span class="doccomment">//! # let rng = GeneratorOpenSSL {};</span>
@@ -348,9 +372,9 @@
 <span class="doccomment">//! **Integer Partitions**: a sample invocation given a distance `d` for the </span>
 <span class="doccomment">//! integer partition exponential mechanism as in Blocki, Datta and Bonneau &#39;16.</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,integer_partition_mechanism_with_bounds, PartitionBound};</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,integer_partition_mechanism_with_bounds, PartitionBound, errors::*};</span>
 <span class="doccomment">//! # use rug::Float;</span>
-<span class="doccomment">//! # fn main() -&gt; Result&lt;(),&amp;&#39;static str&gt; {</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! let eta = Eta::new(1,1,1)?;</span>
 <span class="doccomment">//! let d = 5;</span>
 <span class="doccomment">//! let x: Vec&lt;i64&gt; = vec![5,4,3,2,1,0];</span>
@@ -361,6 +385,22 @@
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
+
+<span class="comment">// Setup for `error_chain`</span>
+<span class="comment">// `error_chain!` can recurse deeply</span>
+<span class="attribute">#![<span class="ident">recursion_limit</span> <span class="op">=</span> <span class="string">&quot;1024&quot;</span>]</span>
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">error_chain</span>;
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">errors</span> {
+    <span class="comment">// Create the Error, ErrorKind, ResultExt, and Result types</span>
+    <span class="macro">error_chain</span><span class="macro">!</span> {}
+}
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">errors</span>::<span class="kw-2">*</span>;
+<span class="comment">// trait which holds `display_chain`</span>
 
 
 <span class="doccomment">/// Base-2 Differential Privacy Utilities</span>
@@ -387,5 +427,7 @@
 
 <span class="comment">// Sparse Vector</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mechanisms</span>::<span class="ident">sparsevector</span>::<span class="ident">sparse_vector</span>;
+
+
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "b2dp";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

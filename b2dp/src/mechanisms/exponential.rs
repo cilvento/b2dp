@@ -3,6 +3,7 @@
 use rug::{Float, ops::Pow, rand::ThreadRandGen};
 use crate::utilities::exactarithmetic::{ArithmeticConfig, normalized_sample, randomized_round};
 use crate::utilities::params::Eta;
+use crate::errors::*;
 
 
 /// The exponential mechanism optional parameters. 
@@ -81,14 +82,14 @@ impl ExponentialConfig {
                max_outcomes: u32, 
                empirical_precision: bool, 
                min_retries: u32)
-            -> Result<ExponentialConfig, &'static str> 
+            -> Result<ExponentialConfig>
     {       
         // Parameter sanity checking
         if utility_min > utility_max {
-            return Err("utility_min must be smaller than utility_max");
+            return Err("utility_min must be smaller than utility_max.".into());
         }
         if max_outcomes == 0 {
-            return Err("Must provide a positive value for max_outcomes");
+            return Err("Must provide a positive value for max_outcomes.".into());
         }
 
         let arithmetic_config =  ArithmeticConfig::for_exponential(&eta, 
@@ -180,17 +181,20 @@ pub fn exponential_mechanism<T, R: ThreadRandGen + Copy, F: Fn(&T)->f64>
           max_outcomes: u32,
           rng: R, 
           options: ExponentialOptions) 
-    -> Result<&T, &'static str> 
+    -> Result<&T>
 {
     // Check Parameters
     eta.check()?;
     if (max_outcomes as usize) < outcomes.len() {
-        return Err("Number of outcomes exceeds max_outcomes.");
+        return Err("Number of outcomes exceeds max_outcomes.".into());
     }
 
     // Generate an ExponentialConfig
-    let mut exponential_config = ExponentialConfig::new(eta, utility_min, utility_max, 
-                                                        max_outcomes, options.empirical_precision,
+    let mut exponential_config = ExponentialConfig::new(eta, 
+                                                        utility_min, 
+                                                        utility_max, 
+                                                        max_outcomes, 
+                                                        options.empirical_precision,
                                                         options.min_retries)?;
     
     // Compute Utilities

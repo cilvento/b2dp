@@ -1,9 +1,12 @@
 //! Naive Mechanism Implementations for comparison
 use rug::{Float, rand::ThreadRandGen, rand::ThreadRandState};
+use crate::errors::*;
+
+
 pub fn naive_exponential_mechanism<T, R: ThreadRandGen + Copy>(epsilon: f64, 
                                                                outcomes: &Vec<T>, 
                                                                utility: fn(&T) -> f64,
-                                                               mut rng: R) -> Result<&T, &'static str> 
+                                                               mut rng: R) -> Result<&T>
     {
         let mut weights: Vec<f64> = Vec::new();
         let mut rand_state = ThreadRandState::new_custom(&mut rng);
@@ -32,7 +35,7 @@ pub fn naive_exponential_mechanism<T, R: ThreadRandGen + Copy>(epsilon: f64,
             }
         }
         if index.is_none(){
-            return Err("Failed to sample");
+            return Err("Failed to sample".into());
         }
         return Ok(&outcomes[index.unwrap()]);
 

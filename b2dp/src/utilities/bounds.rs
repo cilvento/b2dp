@@ -5,6 +5,7 @@
 use crate::{Eta, ExponentialOptions};
 use crate::mechanisms::laplace::clamped_laplace_mechanism;
 use rug::{ rand::ThreadRandGen};
+use crate::errors::*;
 
 #[derive(Debug)]
 pub struct PartitionBoundOptions {
@@ -53,13 +54,13 @@ impl PartitionBound {
     /// Checks that the partition bounds are valid:
     ///   * Upper bound always greater than or equal to lower bound
     ///   * Terminating zeros
-    pub fn check(&self) -> Result<(),&'static str>
+    pub fn check(&self) -> Result<()>
     {
-        if self.upper.len() != self.lower.len() { return Err("Bound length mismatch."); }
+        if self.upper.len() != self.lower.len() { return Err("Bound length mismatch.".into()); }
         for i in 0..self.upper.len() {
-            if self.upper[i] < self.lower[i] { return Err("Bound inversion"); }
+            if self.upper[i] < self.lower[i] { return Err("Bound inversion".into()); }
         }
-        if self.upper[self.upper.len()-1] != 0 {return Err("Unterminated bound");}
+        if self.upper[self.upper.len()-1] != 0 {return Err("Unterminated bound".into());}
         Ok(())
     }
 
@@ -70,7 +71,7 @@ impl PartitionBound {
     ///   * `total_count`: upper bound on the total count
     /// ## Returns 
     /// A `PartitionBound` constructed via the naive formula.
-    pub fn new(total_count: usize) -> Result<PartitionBound, &'static str> 
+    pub fn new(total_count: usize) -> Result<PartitionBound>
     {       
         let mut upper: Vec<i64> = Vec::with_capacity(total_count as usize);
         let mut lower: Vec<i64> = vec![0;total_count + 1 as usize];
@@ -83,7 +84,12 @@ impl PartitionBound {
         // Add terminating pair.
         upper.push(0);
 
-        let pb = PartitionBound { upper, lower, count: total_count, cells: total_count, sparsity_control: false , noisy_estimates: None};
+        let pb = PartitionBound { upper, 
+                                  lower, 
+                                  count: total_count, 
+                                  cells: total_count, 
+                                  sparsity_control: false, 
+                                  noisy_estimates: None};
 
         Ok(pb)
     }
@@ -94,7 +100,7 @@ impl PartitionBound {
     ///   * `total_count`: the total size of the partition.
     ///   * `total_cells`: (upper bound on) the total number of cells/length of the partition. 
     pub fn with_cells(total_count: usize, total_cells: usize) 
-           -> Result<PartitionBound, &'static str> 
+           -> Result<PartitionBound>
     { 
         let mut upper: Vec<i64> = Vec::with_capacity(total_cells as usize);
         let mut lower: Vec<i64> = vec![0;total_cells + 1 as usize];
@@ -107,7 +113,12 @@ impl PartitionBound {
         // Terminating pair
         upper.push(0);
 
-        let pb = PartitionBound { upper, lower, count: total_count, cells: total_cells, sparsity_control: false, noisy_estimates: None };
+        let pb = PartitionBound { upper, 
+                                  lower, 
+                                  count: total_count, 
+                                  cells: total_cells, 
+                                  sparsity_control: false, 
+                                  noisy_estimates: None };
 
         return Ok(pb); 
     }
@@ -179,7 +190,7 @@ impl PartitionBound {
     /// * `total_count`: an upper bound on the total size of the partition
     /// * `total_cells`: an upper bound on the total number of cells
     pub fn from_dist(d: usize, x:&Vec<i64>, total_count: usize, total_cells: usize) 
-        -> Result<PartitionBound, &'static str> 
+        -> Result<PartitionBound>
     {
         // if x is longer than total_cells, truncate it
         let y = x;
@@ -233,9 +244,9 @@ impl PartitionBound {
     /// which are ~centered on the provided reference `r` and include all integer partitions within 
     /// the estimated noisy distance.  
     pub fn with_reference(_total_count: usize,  _ref: &Vec<i64>, _x: &Vec<i64>, _eta: Eta)
-            -> Result<PartitionBound, &'static str>
+            -> Result<PartitionBound>
     {
-        Err("Not implemented")
+        Err("Not implemented".into())
     }
 
     
@@ -269,12 +280,12 @@ impl PartitionBound {
     /// ```
     pub fn from_noisy_estimates<R: ThreadRandGen + Copy>(total_count: usize, total_cells: Option<usize>, x: &Vec<i64>, eta: Eta, 
         rng: R, options: PartitionBoundOptions)
-        -> Result<PartitionBound, &'static str>
+        -> Result<PartitionBound>
     {
         let mut cells = total_count;
         // Check that total_cells is valid
         if total_cells.is_some() {cells = total_cells.unwrap();}
-        if cells == 0 { return Err("Cell count must be positive."); }
+        if cells == 0 { return Err("Cell count must be positive.".into()); }
 
         // If sparsity control is specified, get an estimate of the number of zeros
         // and adjust cells to the noisy number of non-zero cells plus padding
@@ -345,7 +356,7 @@ impl PartitionBound {
             if lower > pb_baseline.upper[i] { lower = pb_baseline.upper[i]; }
             if upper > pb_baseline.upper[i] { upper = pb_baseline.upper[i]; }
             if upper < pb_baseline.lower[i] { upper = pb_baseline.lower[i]; }
-            if upper < lower { return Err("Bounds out of order."); }
+            if upper < lower { return Err("Bounds out of order.".into()); }
             upper_bound[i] = upper;
             lower_bound[i] = lower;
         }

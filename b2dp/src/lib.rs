@@ -33,20 +33,23 @@
 //! **Converting a base-e parameter to base-2**
 //! ```
 //! use b2dp::Eta;
+//! # use b2dp::errors::*;
+//! # fn main() -> Result<()> {
 //! let epsilon = 1.25;
-//! let eta = Eta::from_epsilon(epsilon).unwrap();
+//! let eta = Eta::from_epsilon(epsilon)?;
+//! # Ok(()) }
 //! ```
 //! **Running the exponential mechanism**
 //! 
 //! Run the exponential mechanism with utility function `utility_fn`.
 //! ```
-//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL};
+//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};
 //! 
-//! # fn main() -> Result<(),&'static str> {
+//! # fn main() -> Result<()> {
 //! fn util_fn (x: &u32) -> f64 {
 //!     return ((*x as f64)-0.0).abs();
 //! }
-//! let eta = Eta::new(1,1,1).unwrap(); // Construct a privacy parameter
+//! let eta = Eta::new(1,1,1)?; // Construct a privacy parameter
 //! let utility_min = 0; // Set bounds on the utility and outcomes
 //! let utility_max = 10;
 //! let max_outcomes = 10;
@@ -56,7 +59,7 @@
 //!                                     utility_min, utility_max, 
 //!                                     max_outcomes,
 //!                                     rng, 
-//!                                     Default::default()).unwrap();
+//!                                     Default::default())?;
 //! # Ok(()) 
 //! # }
 //! ```
@@ -65,8 +68,8 @@
 //! implementation is `2*alpha*ln(2)*eta` base-e DP. To explicitly scale by `alpha`
 //! the caller can either modify the `eta` used or the utility function.
 //! ```
-//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL};
-//! # fn main() -> Result<(),&'static str> {
+//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};
+//! # fn main() -> Result<()> {
 //! // Scale the privacy parameter to account for the utility sensitivity
 //! let epsilon = 1.25;
 //! let eta = Eta::from_epsilon(epsilon)?;
@@ -87,11 +90,11 @@
 //! `true` or `false` depending on whether each query exceeds the fixed threshold of `0`. 
 //! 
 //! ```
-//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector};
+//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector, errors::*};
 //! # use rug::Float;
-//! # fn main() -> Result<(),&'static str> {
-//! let eta1 = Eta::new(1,1,2).unwrap();
-//! let eta2 = Eta::new(1,1,2).unwrap();
+//! # fn main() -> Result<()> {
+//! let eta1 = Eta::new(1,1,2)?;
+//! let eta2 = Eta::new(1,1,2)?;
 //! let c = 2;
 //! let queries = vec![1.0,2.0,3.0,4.0,5.0,1.0];
 //! let gamma = 0.5;
@@ -109,9 +112,9 @@
 //! centered at `0` with granularity `gamma` exceeds the given `threshold`. 
 //! 
 //! ```
-//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};
+//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold, errors::*};
 //! # use rug::Float;
-//! # fn main() -> Result<(),&'static str> {
+//! # fn main() -> Result<()> {
 //! let eta = Eta::new(1,1,2)?; // can be adjusted for the desired value of gamma.
 //! let mut arithmeticconfig = ArithmeticConfig::basic()?;
 //! let rng = GeneratorOpenSSL {};
@@ -133,9 +136,9 @@
 //! the bound.
 //! 
 //! ```
-//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};
+//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds, errors::*};
 //! # use rug::Float;
-//! # fn main() -> Result<(),&'static str> {
+//! # fn main() -> Result<()> {
 //! # let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
 //! # let mut arithmeticconfig = ArithmeticConfig::basic()?;
 //! # let rng = GeneratorOpenSSL {};
@@ -153,9 +156,9 @@
 //! **Integer Partitions**: a sample invocation given a distance `d` for the 
 //! integer partition exponential mechanism as in Blocki, Datta and Bonneau '16.
 //! ```
-//! # use b2dp::{Eta,GeneratorOpenSSL,integer_partition_mechanism_with_bounds, PartitionBound};
+//! # use b2dp::{Eta,GeneratorOpenSSL,integer_partition_mechanism_with_bounds, PartitionBound, errors::*};
 //! # use rug::Float;
-//! # fn main() -> Result<(),&'static str> {
+//! # fn main() -> Result<()> {
 //! let eta = Eta::new(1,1,1)?;
 //! let d = 5;
 //! let x: Vec<i64> = vec![5,4,3,2,1,0];
@@ -166,6 +169,22 @@
 //! # Ok(())
 //! # }
 //! ```
+
+// Setup for `error_chain`
+// `error_chain!` can recurse deeply
+#![recursion_limit = "1024"]
+#[macro_use]
+extern crate error_chain;
+
+#[doc(hidden)]
+pub mod errors {
+    // Create the Error, ErrorKind, ResultExt, and Result types
+    error_chain! {}
+}
+
+#[doc(hidden)]
+pub use errors::*;
+// trait which holds `display_chain`
 
 
 /// Base-2 Differential Privacy Utilities
@@ -192,3 +211,5 @@ pub use utilities::discretesampling::sample_within_bounds;
 
 // Sparse Vector
 pub use mechanisms::sparsevector::sparse_vector;
+
+

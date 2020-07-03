@@ -5,6 +5,7 @@
 use rug::rand::ThreadRandGen;
 use crate::mechanisms::exponential::{exponential_mechanism, ExponentialOptions};
 use crate::utilities::params::Eta;
+use crate::errors::*;
 
 /// Implements clamped Laplace mechanism via the base-2 exponential mechanism
 /// Outputs an `f64` in the range `[lower_bound, upper_bound]` of the form
@@ -38,12 +39,18 @@ use crate::utilities::params::Eta;
 /// let rng = GeneratorOpenSSL {};
 /// let sample = clamped_laplace_mechanism(eta, lower_bound, upper_bound, target, gamma, rng, Default::default()).unwrap();
 /// ```
-pub fn clamped_laplace_mechanism<R: ThreadRandGen + Copy>(eta: Eta, lower_bound: f64, upper_bound: f64, target: f64, gamma: f64,
-                                rng: R, options: ExponentialOptions) -> Result<f64, &'static str> 
+pub fn clamped_laplace_mechanism<R: ThreadRandGen + Copy>(eta: Eta, 
+                                                          lower_bound: f64, 
+                                                          upper_bound: f64, 
+                                                          target: f64, 
+                                                          gamma: f64,
+                                                          rng: R, 
+                                                          options: ExponentialOptions) 
+        -> Result<f64>
     {
     // Check Parameters
     eta.check()?;
-    if lower_bound >= upper_bound {return Err("lower_bound must be smaller than upper_bound");} 
+    if lower_bound >= upper_bound {return Err("lower_bound must be smaller than upper_bound".into());} 
 
     // Clamp the target
     let mut clamp_target = target;

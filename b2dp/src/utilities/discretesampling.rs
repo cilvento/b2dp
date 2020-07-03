@@ -5,7 +5,7 @@
 use rug::{ops::Pow, rand::ThreadRandGen, Float, float::Special};
 use super::exactarithmetic::{ArithmeticConfig, normalized_sample};
 use super::params::Eta;
-
+use crate::errors::*;
 /// Returns whether a is an integer multiple of b
 pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
     if a.is_infinite() || b.is_infinite() { return false; }
@@ -51,7 +51,8 @@ pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
 /// ```
 /// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};
 /// # use rug::Float;
-/// # fn main() -> Result<(),&'static str> {
+/// # use b2dp::errors::*;
+/// # fn main() -> Result<()> {
 /// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
@@ -69,12 +70,12 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
                                                 wmin: &Float, wmax: &Float, 
                                                 arithmeticconfig: & mut ArithmeticConfig,
                                                 rng: R, optimize: bool)
-    -> Result<Float,&'static str>
+    -> Result<Float>
 {
     // Check inputs
-    if wmax <= wmin { return Err("`wmin` must be strictly less than `wmax`."); }
-    if !is_multiple_of(&wmin, &gamma) { return Err("`wmin` is not integer multiple of `gamma`."); }
-    if !is_multiple_of(&wmax, &gamma) { return Err("`wmax` is not integer multiple of `gamma`."); }
+    if wmax <= wmin { return Err("`wmin` must be strictly less than `wmax`.".into()); }
+    if !is_multiple_of(&wmin, &gamma) { return Err("`wmin` is not integer multiple of `gamma`.".into()); }
+    if !is_multiple_of(&wmax, &gamma) { return Err("`wmax` is not integer multiple of `gamma`.".into()); }
     let t_min = arithmeticconfig.get_float(wmin/gamma);
     let t_max = arithmeticconfig.get_float(wmax/gamma);
 
@@ -147,10 +148,10 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
 /// ## Exact Arithmetic
 /// Does not enforce exact arithmetic, this is the caller's responsibility.
 pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut ArithmeticConfig) 
-    -> Result<Eta,&'static str> 
+    -> Result<Eta>//,&'static str> 
 {
     // Check that gamma is valid for the given eta
-    if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer."); }
+    if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer.".into()); }
     let gamma = arithmeticconfig.get_float(1.0/gamma_inv);
     // Check if eta.z is divisible by gamma_inv.
     let mut z_prime = eta.z; 
@@ -169,11 +170,11 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
         let fx = arithmeticconfig.get_float(eta.x);
         let fy = arithmeticconfig.get_float(eta.y);
         
-        if !is_multiple_of(&fy, &gamma) {return Err("Unable to adjust for gamma (y).");}
+        if !is_multiple_of(&fy, &gamma) {return Err("Unable to adjust for gamma (y).".into());}
         let rooty = arithmeticconfig.get_float(fy*&gamma);
         
         let rootx = arithmeticconfig.get_float(fx.pow(&gamma));
-        if !rootx.is_integer() {return Err("Unable to adjust for gamma (x).");}
+        if !rootx.is_integer() {return Err("Unable to adjust for gamma (x).".into());}
         
         x_prime = rootx.to_integer().unwrap().to_u32().unwrap(); // TODO: more elegant error handling
         y_prime = rooty.to_integer().unwrap().to_u32().unwrap();
@@ -212,7 +213,8 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// ```
 /// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};
 /// # use rug::Float;
-/// # fn main() -> Result<(),&'static str> {
+/// # use b2dp::errors::*;
+/// # fn main() -> Result<()> {
 /// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
@@ -230,7 +232,8 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// ```
 pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut ArithmeticConfig, gamma_inv: &Float, threshold: &Float,
                         rng: R, optimize: bool) 
-    -> Result<Float, &'static str> { 
+    -> Result<Float>
+    { 
         // plus and minus infinity
         let plus_infty = arithmeticconfig.get_float(Special::Infinity);
         let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
@@ -241,11 +244,11 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
         let base = eta_prime.get_base(arithmeticconfig.precision)?;
         
         // Check that gamma is valid (integer reciprocal)
-        if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer."); }
+        if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer.".into()); }
         let gamma = arithmeticconfig.get_float(1/gamma_inv);
 
         // Check that threshold is integer multiple of gamma
-        if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`."); }
+        if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`.".into()); }
         let t = arithmeticconfig.get_float(threshold*gamma_inv); 
 
         let p_top = get_sum(&base,
@@ -289,18 +292,18 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
 /// The recursive calls to `get_sum` introduce a timing channel distinguishing whether
 /// `start` and `end` cross zero. 
 pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: &Float, end: &Float) 
-    -> Result<Float,&'static str>
+    -> Result<Float>
 {
     // Check ordering
-    if start >= end { return Err("`start` must be strictly less than `end`."); }
+    if start >= end { return Err("`start` must be strictly less than `end`.".into()); }
     // Check integrality
     if (!start.is_integer() && start.is_finite()) || // infinite values are not considered integers
         (!end.is_integer() && end.is_finite()) { 
-        return Err("integer values only");
+        return Err("`start` and `end` must be integer values or infinite.".into());
     }
 
     // Check base magnitude
-    if *base >= 1 { return Err("`base` must be less than 1."); }
+    if *base >= 1 { return Err("`base` must be less than 1.".into()); }
 
     // Check for negative infinity case
     if start.is_infinite() && start.is_sign_negative() {

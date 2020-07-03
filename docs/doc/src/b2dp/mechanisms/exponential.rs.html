@@ -275,12 +275,17 @@
 <span id="275">275</span>
 <span id="276">276</span>
 <span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements the base-2 exponential mechanism. </span>
 
 <span class="kw">use</span> <span class="ident">rug</span>::{<span class="ident">Float</span>, <span class="ident">ops</span>::<span class="ident">Pow</span>, <span class="ident">rand</span>::<span class="ident">ThreadRandGen</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">exactarithmetic</span>::{<span class="ident">ArithmeticConfig</span>, <span class="ident">normalized_sample</span>, <span class="ident">randomized_round</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">params</span>::<span class="ident">Eta</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">errors</span>::<span class="kw-2">*</span>;
 
 
 <span class="doccomment">/// The exponential mechanism optional parameters. </span>
@@ -359,14 +364,14 @@
                <span class="ident">max_outcomes</span>: <span class="ident">u32</span>, 
                <span class="ident">empirical_precision</span>: <span class="ident">bool</span>, 
                <span class="ident">min_retries</span>: <span class="ident">u32</span>)
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ExponentialConfig</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ExponentialConfig</span><span class="op">&gt;</span>
     {       
         <span class="comment">// Parameter sanity checking</span>
         <span class="kw">if</span> <span class="ident">utility_min</span> <span class="op">&gt;</span> <span class="ident">utility_max</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;utility_min must be smaller than utility_max&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;utility_min must be smaller than utility_max.&quot;</span>.<span class="ident">into</span>());
         }
         <span class="kw">if</span> <span class="ident">max_outcomes</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Must provide a positive value for max_outcomes&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Must provide a positive value for max_outcomes.&quot;</span>.<span class="ident">into</span>());
         }
 
         <span class="kw">let</span> <span class="ident">arithmetic_config</span> <span class="op">=</span>  <span class="ident">ArithmeticConfig</span>::<span class="ident">for_exponential</span>(<span class="kw-2">&amp;</span><span class="ident">eta</span>, 
@@ -458,17 +463,20 @@
           <span class="ident">max_outcomes</span>: <span class="ident">u32</span>,
           <span class="ident">rng</span>: <span class="ident">R</span>, 
           <span class="ident">options</span>: <span class="ident">ExponentialOptions</span>) 
-    <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
+    <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span>
 {
     <span class="comment">// Check Parameters</span>
     <span class="ident">eta</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
     <span class="kw">if</span> (<span class="ident">max_outcomes</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">outcomes</span>.<span class="ident">len</span>() {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Number of outcomes exceeds max_outcomes.&quot;</span>);
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Number of outcomes exceeds max_outcomes.&quot;</span>.<span class="ident">into</span>());
     }
 
     <span class="comment">// Generate an ExponentialConfig</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exponential_config</span> <span class="op">=</span> <span class="ident">ExponentialConfig</span>::<span class="ident">new</span>(<span class="ident">eta</span>, <span class="ident">utility_min</span>, <span class="ident">utility_max</span>, 
-                                                        <span class="ident">max_outcomes</span>, <span class="ident">options</span>.<span class="ident">empirical_precision</span>,
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exponential_config</span> <span class="op">=</span> <span class="ident">ExponentialConfig</span>::<span class="ident">new</span>(<span class="ident">eta</span>, 
+                                                        <span class="ident">utility_min</span>, 
+                                                        <span class="ident">utility_max</span>, 
+                                                        <span class="ident">max_outcomes</span>, 
+                                                        <span class="ident">options</span>.<span class="ident">empirical_precision</span>,
                                                         <span class="ident">options</span>.<span class="ident">min_retries</span>)<span class="question-mark">?</span>;
     
     <span class="comment">// Compute Utilities</span>
