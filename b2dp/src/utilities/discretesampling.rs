@@ -1,12 +1,14 @@
 //! Implements discrete sampling methods in base-2
 //! including [`noisy_threshold`](./fn.noisy_threshold.html) and 
 //! [`sample_within_bounds`](./fn.sample_within_bounds.html).
+//! Function names/signatures are not finalized and are 
+//! likely to be changed.
 
 use rug::{ops::Pow, rand::ThreadRandGen, Float, float::Special};
 use super::exactarithmetic::{ArithmeticConfig, normalized_sample};
 use super::params::Eta;
 use crate::errors::*;
-/// Returns whether a is an integer multiple of b
+/// Returns whether a is an integer multiple of b.
 pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
     if a.is_infinite() || b.is_infinite() { return false; }
     let c = Float::with_val(a.prec(),a).remainder(b);
@@ -62,7 +64,7 @@ pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
 /// arithmeticconfig.enter_exact_scope()?;
 /// let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false)?;
 /// let b = arithmeticconfig.exit_exact_scope();
-/// assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
+/// assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
 /// # Ok(())
 /// # }
 /// ```
@@ -133,7 +135,7 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
 }
 
 
-/// Adjust the given eta to account for granularity 1/gamma_inv
+/// Adjust the given eta to account for granularity 1/gamma_inv. 
 /// 
 /// ## Arguments
 /// * `eta`: privacy parameter
@@ -184,18 +186,124 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 
 }
 
-
-/// Determines whether the discretized Laplace exceeds the given threshold
+/// Determines whether the discretized Laplace exceeds the given threshold conditioned
+/// on it exceeding the given conditional threshold.
 /// ## Arguments
 ///   * `eta`: the privacy parameter
-///   * `arithmeticconfig`:
-///   * `gamma`
-///   * `threshold`: 
+///   * `arithmeticconfig`: ArithmeticConfig with sufficient precision
+///   * `gamma`: granularity parameter
+///   * `threshold`: the threshold value 
+///   * `cond_threshold`: (Must be smaller than `threshold`)
 ///   * `rng`: randomness source
 ///   * `optimize`: whether to optimize sampling, exacerbates timing channels
 /// 
 /// ## Returns
 /// Returns a `Float` with value `Special::Infinity` if greater than or equal to the threshold,
+/// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot
+/// be appropriately adjusted or sum computation fails. 
+/// 
+/// ## Exact Arithmetic
+/// Does not explicitly enforce exact arithmetic, this is the caller's responsibility.
+/// 
+/// ## Privacy Budget
+/// Uses `eta` privacy budget. Note that if multiple calls of conditional threshold are made
+/// in a chain, i.e., cond_threshold(T_0,T_1); cond_threshold(T_1,T_2) then the privacy budget
+/// may be shared among these calls. This accounting must be used with caution. 
+/// 
+/// ## Timing Channels
+/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
+/// which has known timing channels. 
+/// 
+/// ## Example Usage
+/// ```
+/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, conditional_noisy_threshold};
+/// # use rug::Float;
+/// # use b2dp::errors::*;
+/// # fn main() -> Result<()> {
+/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
+/// let mut arithmeticconfig = ArithmeticConfig::basic()?;
+/// let rng = GeneratorOpenSSL {};
+/// let gamma_inv = arithmeticconfig.get_float(2);
+/// let cond_threshold = arithmeticconfig.get_float(0);
+/// let threshold = arithmeticconfig.get_float(1);
+/// arithmeticconfig.enter_exact_scope()?; 
+/// let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false)?;
+/// assert!(!s.is_finite()); // returns plus or minus infinity
+/// if s.is_sign_positive() { /* Greater than the threshold */ ;}
+/// else { /* Less than the threshold. */ ;}
+/// let b = arithmeticconfig.exit_exact_scope();
+/// assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
+/// # Ok(())
+/// # }
+/// ```
+pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta, 
+                                                     arithmeticconfig: & mut ArithmeticConfig, 
+                                                     gamma_inv: &Float, 
+                                                     threshold: &Float,
+                                                     cond_threshold: &Float,
+                                                     rng: R, optimize: bool) 
+-> Result<Float>
+{
+    // plus and minus infinity
+    let plus_infty = arithmeticconfig.get_float(Special::Infinity);
+    let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
+
+    // Adjust eta to take gamma into account.
+    let eta_prime = adjust_eta(eta, gamma_inv, arithmeticconfig)?;
+    // get the base for the adjusted eta
+    let base = eta_prime.get_base(arithmeticconfig.precision)?;
+    
+    // Check that gamma is valid (integer reciprocal)
+    if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer.".into()); }
+    let gamma = arithmeticconfig.get_float(1/gamma_inv);
+
+    // Check that cond_threshold is less than threshold
+    if cond_threshold > threshold {
+        return Err("conditional threshold must be smaller than threshold.".into());
+    }
+    else if cond_threshold == threshold {
+        return Ok(plus_infty); // The value already equals the threshold
+    }
+    // Check that thresholds are integer multiples of gamma
+    if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`.".into()); }
+    if !is_multiple_of(&cond_threshold, &gamma)  { return Err("`cond_threshold` must be integer multiple of `gamma`.".into()); }
+    let t = arithmeticconfig.get_float(threshold*gamma_inv); 
+
+    // Sum of weights above the threshold
+    let p_top = get_sum(&base,
+                        arithmeticconfig, 
+                        &t, 
+                        &plus_infty)?;
+    // Sum of weights between the conditional threshold and positive infinity
+    let p_total = get_sum(&base,
+                        arithmeticconfig, 
+                        &cond_threshold, 
+                        &plus_infty)?;
+    let p_bot = arithmeticconfig.get_float(p_total - &p_top);
+    let weights: Vec<Float> = vec![p_top,p_bot];
+    let s = normalized_sample(&weights, arithmeticconfig,rng,optimize)?;
+    
+    if s == 0 {
+        return Ok(plus_infty);
+    }
+    else {
+        return Ok(neg_infty);
+    }
+}
+
+
+/// Determines whether the discretized Laplace exceeds the given threshold. 
+/// ## Arguments
+///   * `eta`: the privacy parameter
+///   * `arithmeticconfig`: ArithmeticConfig with sufficient precision
+///   * `gamma`: granularity parameter
+///   * `threshold`: the threshold value 
+///   * `rng`: randomness source
+///   * `optimize`: whether to optimize sampling, exacerbates timing channels
+/// 
+/// ## Returns
+/// Returns a `Float` with value `Special::Infinity` if draw from the discrete Laplace is 
+/// greater than or equal to the threshold,
 /// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot
 /// be appropriately adjusted or sum computation fails. 
 /// 
@@ -226,7 +334,7 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// if s.is_sign_positive() { /* Greater than the threshold */ ;}
 /// else { /* Less than the threshold. */ ;}
 /// let b = arithmeticconfig.exit_exact_scope();
-/// assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
+/// assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
 /// # Ok(())
 /// # }
 /// ```
@@ -264,10 +372,10 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
         let s = normalized_sample(&weights, arithmeticconfig,rng,optimize)?;
         
         if s == 0 {
-            return Ok(arithmeticconfig.get_float(Special::Infinity));
+            return Ok(plus_infty);
         }
         else {
-            return Ok(arithmeticconfig.get_float(Special::NegInfinity));
+            return Ok(neg_infty);
         }
     }
 
@@ -441,6 +549,48 @@ mod tests {
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
         
+    }
+
+    #[test]
+    fn test_cond_noisy_threshold(){
+
+        // Equivalent threshold test
+        let eta = Eta::new(1,1,2).unwrap();
+        let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
+        let rng = GeneratorOpenSSL {};
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let threshold = arithmeticconfig.get_float(0);
+        let cond_threshold = arithmeticconfig.get_float(0);
+        let _a = arithmeticconfig.enter_exact_scope();
+        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false).unwrap();
+        assert!(!s.is_finite()); // should get plus or minus infinity
+        let b = arithmeticconfig.exit_exact_scope();
+        assert!(b.is_ok());
+
+        // Check fail on cond threshold that is not a multiple of gamma
+        let eta = Eta::new(1,1,2).unwrap();
+        let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
+        let rng = GeneratorOpenSSL {};
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let cond_threshold = arithmeticconfig.get_float(0.3);
+        let threshold = arithmeticconfig.get_float(1);
+        let _a = arithmeticconfig.enter_exact_scope();
+        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
+        assert!(s.is_err());
+        let b = arithmeticconfig.exit_exact_scope();
+        assert!(b.is_ok());
+        
+        // Check fail on threshold < cond_threshold
+        let eta = Eta::new(1,1,2).unwrap();
+        let mut arithmeticconfig = ArithmeticConfig::basic().unwrap();
+        let rng = GeneratorOpenSSL {};
+        let gamma_inv = arithmeticconfig.get_float(2);
+        let threshold = arithmeticconfig.get_float(0);
+        let cond_threshold = arithmeticconfig.get_float(1);
+        let _a = arithmeticconfig.enter_exact_scope();
+        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
+        assert!(s.is_err());
+        let _b = arithmeticconfig.exit_exact_scope(); 
     }
 
 

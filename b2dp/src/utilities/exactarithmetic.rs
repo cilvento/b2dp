@@ -14,43 +14,44 @@ use gmp_mpfr_sys::mpfr;
 ///   * `arithmetic_config`: the arithmetic configuration to use
 /// ## Returns
 /// `x` rounded to the nearest smaller or larger integer by drawing a random value
-/// `rho` in `[0,1]` and rounding up if `rho > x_fract`, rounding down otherwise.
-pub fn randomized_round<R: ThreadRandGen>(x: f64,
-                                          arithmetic_config: &mut ArithmeticConfig,
-                                          mut rng: R) 
-                                          -> i64 
+/// `rho` in `[0,1]` and rounding down if `rho > x_fract`, rounding up otherwise.
+pub fn randomized_round<R: ThreadRandGen>
+                        (x: f64,
+                         arithmetic_config: &mut ArithmeticConfig,
+                         mut rng: R) 
+  -> i64 
 {
     // if x is already integer, return it
     if x.trunc() == x { return x as i64; }
-    // Get fractional part of x
-    let x_fract = x.fract();
-    let x_trunc = x.trunc() as i64;
+    
+    let x_fract = x.fract(); // fractional part of x
+    let x_trunc = x.trunc() as i64; // integer part of x
     // Draw a random value
-    let mut rand_state = ThreadRandState::new_custom(&mut rng);
-    //let rho = arithmetic_config.get_float(Float::random_bits(&mut rand_state));
-    let rho = Float::with_val(
-        arithmetic_config.precision,
-        Float::random_bits(&mut rand_state),
-    );
+    let rho = arithmetic_config.get_rand_float(&mut rng);
     if rho > x_fract {
-        return x_trunc;
+        return x_trunc; // round down
     } else {
-        return x_trunc + 1;
+        return x_trunc + 1; // round up
     }
 }
 
 /// Determine smallest `k` such that `2^k >= total_weight`.
-fn get_power_bound(total_weight: &Float, arithmetic_config: &mut ArithmeticConfig) -> i32 {
+/// Returns zero if `total_weight` <= 0.
+fn get_power_bound(total_weight: &Float, 
+                   arithmetic_config: &mut ArithmeticConfig) 
+  -> i32 
+{
     let mut k: i32 = 0;
+    if *total_weight <= 0 { return 0; }
     if *total_weight > 1 {
         // increase `k` until `2^k >= total_weight`.
         let mut two_exp_k = Float::i_pow_u(2, k as u32);
-        while arithmetic_config.get_float( two_exp_k) < *total_weight {
+        while arithmetic_config.get_float(two_exp_k) < *total_weight {
             k += 1;
             two_exp_k = Float::i_pow_u(2, k as u32);
         }
     } else {
-        let mut w = arithmetic_config.get_float( total_weight);
+        let mut w = arithmetic_config.get_float(total_weight);
         while w <= 1 {
             k -= 1;
             w *= 2;
@@ -134,7 +135,7 @@ pub fn normalized_sample<R: ThreadRandGen>(
     }
 
     if zero_weight.is_some() {return Err("All weights must be positive.");}
-    // Determine smallest `k` such that `2^k > total_weight`
+    // Determine smallest `k` such that `2^k >= total_weight`
     let k = get_power_bound(&total_weight, arithmetic_config);
 
     let mut t = arithmetic_config.get_float(&total_weight);
@@ -143,7 +144,8 @@ pub fn normalized_sample<R: ThreadRandGen>(
     t += 1; // ensure that the initial `t` is larger than `total_weight`.
     while t >= total_weight || retries < arithmetic_config.retry_min {
         let mut s = arithmetic_config.get_rand_float(&mut rng);
-        // Multiply by 2^k to scale
+        // Multiply by 2^k to scale 
+        // Note: Float::i_exp(a,b) returns a*2^b
         let two_pow_k = arithmetic_config.get_float(Float::i_exp(1, k));
         s = s * two_pow_k;
         // Assign to t if in bounds 
@@ -597,6 +599,15 @@ mod tests {
         let mut r = get_power_bound(&x, &mut arithmetic_config);
         assert_eq!(r, 1);
 
+        let y = Float::with_val(arithmetic_config.precision, 1);
+        let s = get_power_bound(&y, &mut arithmetic_config);
+        assert_eq!(s, 0);
+
+
+        let y = Float::with_val(arithmetic_config.precision, 0.5);
+        let s = get_power_bound(&y, &mut arithmetic_config);
+        assert_eq!(s, -1);
+
         let y = Float::with_val(arithmetic_config.precision, 0.35);
         let s = get_power_bound(&y, &mut arithmetic_config);
         assert_eq!(s, -1);
@@ -616,6 +627,16 @@ mod tests {
         x = Float::with_val(arithmetic_config.precision, 16);
         r = get_power_bound(&x, &mut arithmetic_config);
         assert_eq!(r, 4);
+
+        // Test weights <= 0
+        let y = Float::with_val(arithmetic_config.precision, 0);
+        let s = get_power_bound(&y, &mut arithmetic_config);
+        assert_eq!(s, 0);
+
+        let y = Float::with_val(arithmetic_config.precision, -1);
+        let s = get_power_bound(&y, &mut arithmetic_config);
+        assert_eq!(s, 0);
+
 
         arithmetic_config.exit_exact_scope().unwrap();
     }

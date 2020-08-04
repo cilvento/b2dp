@@ -1008,6 +1008,27 @@
 <span id="1008">1008</span>
 <span id="1009">1009</span>
 <span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements methods requiring exact arithmetic, and encapsulates all</span>
 <span class="doccomment">//! `unsafe` code to access `mpfr::flags` to determine whether coputations</span>
@@ -1025,43 +1046,44 @@
 <span class="doccomment">///   * `arithmetic_config`: the arithmetic configuration to use</span>
 <span class="doccomment">/// ## Returns</span>
 <span class="doccomment">/// `x` rounded to the nearest smaller or larger integer by drawing a random value</span>
-<span class="doccomment">/// `rho` in `[0,1]` and rounding up if `rho &gt; x_fract`, rounding down otherwise.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">randomized_round</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">x</span>: <span class="ident">f64</span>,
-                                          <span class="ident">arithmetic_config</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>,
-                                          <span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="ident">R</span>) 
-                                          <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span> 
+<span class="doccomment">/// `rho` in `[0,1]` and rounding down if `rho &gt; x_fract`, rounding up otherwise.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">randomized_round</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>
+                        (<span class="ident">x</span>: <span class="ident">f64</span>,
+                         <span class="ident">arithmetic_config</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>,
+                         <span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="ident">R</span>) 
+  <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span> 
 {
     <span class="comment">// if x is already integer, return it</span>
     <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">x</span> { <span class="kw">return</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">i64</span>; }
-    <span class="comment">// Get fractional part of x</span>
-    <span class="kw">let</span> <span class="ident">x_fract</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">fract</span>();
-    <span class="kw">let</span> <span class="ident">x_trunc</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="kw">as</span> <span class="ident">i64</span>;
+    
+    <span class="kw">let</span> <span class="ident">x_fract</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">fract</span>(); <span class="comment">// fractional part of x</span>
+    <span class="kw">let</span> <span class="ident">x_trunc</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="kw">as</span> <span class="ident">i64</span>; <span class="comment">// integer part of x</span>
     <span class="comment">// Draw a random value</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rand_state</span> <span class="op">=</span> <span class="ident">ThreadRandState</span>::<span class="ident">new_custom</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rng</span>);
-    <span class="comment">//let rho = arithmetic_config.get_float(Float::random_bits(&amp;mut rand_state));</span>
-    <span class="kw">let</span> <span class="ident">rho</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(
-        <span class="ident">arithmetic_config</span>.<span class="ident">precision</span>,
-        <span class="ident">Float</span>::<span class="ident">random_bits</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rand_state</span>),
-    );
+    <span class="kw">let</span> <span class="ident">rho</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_rand_float</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rng</span>);
     <span class="kw">if</span> <span class="ident">rho</span> <span class="op">&gt;</span> <span class="ident">x_fract</span> {
-        <span class="kw">return</span> <span class="ident">x_trunc</span>;
+        <span class="kw">return</span> <span class="ident">x_trunc</span>; <span class="comment">// round down</span>
     } <span class="kw">else</span> {
-        <span class="kw">return</span> <span class="ident">x_trunc</span> <span class="op">+</span> <span class="number">1</span>;
+        <span class="kw">return</span> <span class="ident">x_trunc</span> <span class="op">+</span> <span class="number">1</span>; <span class="comment">// round up</span>
     }
 }
 
 <span class="doccomment">/// Determine smallest `k` such that `2^k &gt;= total_weight`.</span>
-<span class="kw">fn</span> <span class="ident">get_power_bound</span>(<span class="ident">total_weight</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">arithmetic_config</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+<span class="doccomment">/// Returns zero if `total_weight` &lt;= 0.</span>
+<span class="kw">fn</span> <span class="ident">get_power_bound</span>(<span class="ident">total_weight</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, 
+                   <span class="ident">arithmetic_config</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>) 
+  <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> 
+{
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">k</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">total_weight</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> { <span class="kw">return</span> <span class="number">0</span>; }
     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">total_weight</span> <span class="op">&gt;</span> <span class="number">1</span> {
         <span class="comment">// increase `k` until `2^k &gt;= total_weight`.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">two_exp_k</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">i_pow_u</span>(<span class="number">2</span>, <span class="ident">k</span> <span class="kw">as</span> <span class="ident">u32</span>);
-        <span class="kw">while</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>( <span class="ident">two_exp_k</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">total_weight</span> {
+        <span class="kw">while</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="ident">two_exp_k</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">total_weight</span> {
             <span class="ident">k</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="ident">two_exp_k</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">i_pow_u</span>(<span class="number">2</span>, <span class="ident">k</span> <span class="kw">as</span> <span class="ident">u32</span>);
         }
     } <span class="kw">else</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>( <span class="ident">total_weight</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="ident">total_weight</span>);
         <span class="kw">while</span> <span class="ident">w</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">1</span> {
             <span class="ident">k</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
             <span class="ident">w</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">2</span>;
@@ -1145,7 +1167,7 @@
     }
 
     <span class="kw">if</span> <span class="ident">zero_weight</span>.<span class="ident">is_some</span>() {<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;All weights must be positive.&quot;</span>);}
-    <span class="comment">// Determine smallest `k` such that `2^k &gt; total_weight`</span>
+    <span class="comment">// Determine smallest `k` such that `2^k &gt;= total_weight`</span>
     <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">total_weight</span>, <span class="ident">arithmetic_config</span>);
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="kw-2">&amp;</span><span class="ident">total_weight</span>);
@@ -1154,7 +1176,8 @@
     <span class="ident">t</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>; <span class="comment">// ensure that the initial `t` is larger than `total_weight`.</span>
     <span class="kw">while</span> <span class="ident">t</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">total_weight</span> <span class="op">|</span><span class="op">|</span> <span class="ident">retries</span> <span class="op">&lt;</span> <span class="ident">arithmetic_config</span>.<span class="ident">retry_min</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_rand_float</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rng</span>);
-        <span class="comment">// Multiply by 2^k to scale</span>
+        <span class="comment">// Multiply by 2^k to scale </span>
+        <span class="comment">// Note: Float::i_exp(a,b) returns a*2^b</span>
         <span class="kw">let</span> <span class="ident">two_pow_k</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="ident">Float</span>::<span class="ident">i_exp</span>(<span class="number">1</span>, <span class="ident">k</span>));
         <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span> <span class="op">*</span> <span class="ident">two_pow_k</span>;
         <span class="comment">// Assign to t if in bounds </span>
@@ -1608,6 +1631,15 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">r</span>, <span class="number">1</span>);
 
+        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>, <span class="number">0</span>);
+
+
+        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="number">0.5</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>, <span class="op">-</span><span class="number">1</span>);
+
         <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="number">0.35</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>, <span class="op">-</span><span class="number">1</span>);
@@ -1627,6 +1659,16 @@
         <span class="ident">x</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="number">16</span>);
         <span class="ident">r</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">x</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">r</span>, <span class="number">4</span>);
+
+        <span class="comment">// Test weights &lt;= 0</span>
+        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="number">0</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>, <span class="number">0</span>);
+
+        <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>, <span class="op">-</span><span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_power_bound</span>(<span class="kw-2">&amp;</span><span class="ident">y</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>, <span class="number">0</span>);
+
 
         <span class="ident">arithmetic_config</span>.<span class="ident">exit_exact_scope</span>().<span class="ident">unwrap</span>();
     }

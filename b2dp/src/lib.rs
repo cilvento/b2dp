@@ -3,7 +3,7 @@
 //! Differential Privacy, based on [Ilvento '19](https://arxiv.org/abs/1912.04222).
 //! 
 //! **Status:** active development, reference implementation only. Not 
-//! intended for uses other than research. Subject to change without notice.
+//! intended for uses other than research. **Subject to change without notice.**
 //! 
 //! ## Background
 //! Although the exponential mechanism does not directly reveal the result of inexact
@@ -24,8 +24,8 @@
 //! * The integer partition exponential mechanism is based on extensions of
 //!   the mechanism proposed by Blocki, Datta and Bonneau in this [paper](http://www.jbonneau.com/doc/BDB16-NDSS-pw_list_differential_privacy.pdf).
 //!   Extensions include a pure-DP version of the mechanism and bias computation, 
-//!   and are described more fully in an upcoming paper.
-//! * The sparse vector mechanism is based on an upcoming paper that describes
+//!   and are described in this [working paper](http://bit.ly/39XyNrp).
+//! * The sparse vector mechanism implementation is based on a [working paper](http://bit.ly/3i4EJ4L) that describes
 //!   the dangers of inexact implementation of sparse vector, and in particular
 //!   how randomness alignment must be adjusted to deal with finite values. 
 //! 
@@ -126,7 +126,7 @@
 //! if s.is_sign_positive() { /* Greater than the threshold */ ;}
 //! else { /* Less than the threshold. */ ;}
 //! let b = arithmeticconfig.exit_exact_scope();
-//! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
+//! assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
 //! # Ok(())
 //! # }
 //! ```
@@ -148,7 +148,7 @@
 //! arithmeticconfig.enter_exact_scope()?;
 //! let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false)?;
 //! let b = arithmeticconfig.exit_exact_scope();
-//! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. 
+//! assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
 //! # Ok(())
 //! # }
 //! ```
@@ -207,6 +207,7 @@ pub use utilities::bounds::{PartitionBound,PartitionBoundOptions};
 
 // Discrete Laplace
 pub use utilities::discretesampling::noisy_threshold;
+pub use utilities::discretesampling::conditional_noisy_threshold;
 pub use utilities::discretesampling::sample_within_bounds;
 
 // Sparse Vector

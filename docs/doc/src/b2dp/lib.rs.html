@@ -213,13 +213,14 @@
 <span id="213">213</span>
 <span id="214">214</span>
 <span id="215">215</span>
+<span id="216">216</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # Base-2 Differential Privacy Crate</span>
 <span class="doccomment">//! Implements the exponential mechanism and other utilities for base-2 </span>
 <span class="doccomment">//! Differential Privacy, based on [Ilvento &#39;19](https://arxiv.org/abs/1912.04222).</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! **Status:** active development, reference implementation only. Not </span>
-<span class="doccomment">//! intended for uses other than research. Subject to change without notice.</span>
+<span class="doccomment">//! intended for uses other than research. **Subject to change without notice.**</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ## Background</span>
 <span class="doccomment">//! Although the exponential mechanism does not directly reveal the result of inexact</span>
@@ -240,8 +241,8 @@
 <span class="doccomment">//! * The integer partition exponential mechanism is based on extensions of</span>
 <span class="doccomment">//!   the mechanism proposed by Blocki, Datta and Bonneau in this [paper](http://www.jbonneau.com/doc/BDB16-NDSS-pw_list_differential_privacy.pdf).</span>
 <span class="doccomment">//!   Extensions include a pure-DP version of the mechanism and bias computation, </span>
-<span class="doccomment">//!   and are described more fully in an upcoming paper.</span>
-<span class="doccomment">//! * The sparse vector mechanism is based on an upcoming paper that describes</span>
+<span class="doccomment">//!   and are described in this [working paper](http://bit.ly/39XyNrp).</span>
+<span class="doccomment">//! * The sparse vector mechanism implementation is based on a [working paper](http://bit.ly/3i4EJ4L) that describes</span>
 <span class="doccomment">//!   the dangers of inexact implementation of sparse vector, and in particular</span>
 <span class="doccomment">//!   how randomness alignment must be adjusted to deal with finite values. </span>
 <span class="doccomment">//! </span>
@@ -342,7 +343,7 @@
 <span class="doccomment">//! if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
 <span class="doccomment">//! else { /* Less than the threshold. */ ;}</span>
 <span class="doccomment">//! let b = arithmeticconfig.exit_exact_scope();</span>
-<span class="doccomment">//! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. </span>
+<span class="doccomment">//! assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. </span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -364,7 +365,7 @@
 <span class="doccomment">//! arithmeticconfig.enter_exact_scope()?;</span>
 <span class="doccomment">//! let s = sample_within_bounds(eta, &amp;gamma, &amp;wmin, &amp;wmax, &amp; mut arithmeticconfig, rng,false)?;</span>
 <span class="doccomment">//! let b = arithmeticconfig.exit_exact_scope();</span>
-<span class="doccomment">//! assert!(b.is_ok()); // Must check that no exact arithmetic was performed. </span>
+<span class="doccomment">//! assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. </span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -423,6 +424,7 @@
 
 <span class="comment">// Discrete Laplace</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">noisy_threshold</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">conditional_noisy_threshold</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">sample_within_bounds</span>;
 
 <span class="comment">// Sparse Vector</span>
