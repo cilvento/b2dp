@@ -50,9 +50,9 @@ impl Default for ExponentialOptions {
 struct ExponentialConfig {
     /// The privacy parameter
     pub eta: Eta,
-    /// The maximum utility (signed)
+    /// The minimum utility (maximum weight) (signed)
     pub utility_min: i64,
-    /// The minimum utility (signed)
+    /// The maximum utility (minimum weight) (signed)
     pub utility_max: i64,
     /// The maximum size of the outcome space
     pub max_outcomes: u32,
