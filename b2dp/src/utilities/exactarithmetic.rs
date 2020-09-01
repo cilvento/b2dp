@@ -1,5 +1,5 @@
 //! Implements methods requiring exact arithmetic, and encapsulates all
-//! `unsafe` code to access `mpfr::flags` to determine whether coputations
+//! `unsafe` code to access `mpfr::flags` to determine whether computations
 //! are exact.
 
 
@@ -221,6 +221,11 @@ impl ArithmeticConfig {
         Ok(config)
     }
 
+
+
+    /// Computes the precision necessary for the exponential mechanism
+    /// by computing a set of worst-case sums. 
+    /// Does **not** preserve the state of the incoming `mpfr::flags`.
     unsafe fn get_empirical_precision(eta: &Eta,
                                 utility_min: i64,
                                 utility_max: i64,
@@ -229,12 +234,16 @@ impl ArithmeticConfig {
                                 -> Result<u32,&'static str> 
     {
     
+        // Clear the flags
+        mpfr::clear_flags();
         let mut p = mpfr::get_default_prec() as u32;
         // Get the base with the default precision
         let mut _base_test = eta.get_base(p);
 
         while ArithmeticConfig::check_mpfr_flags().is_err() {
             p *= 2;
+            // Clear the flags
+            mpfr::clear_flags();
             // Check if the precision has exceeded the maximum allowed
             if p > max_precision {
                 return Err("Maximum precision exceeded.");
@@ -641,7 +650,10 @@ mod tests {
         arithmetic_config.exit_exact_scope().unwrap();
     }
 
-    /// Test flag behavior of mpfr
+    /// Test flag behavior of mpfr.
+    /// This is a canary test that tests some of the basic properties
+    /// of the flags and expected behavior. Failure of this test should
+    /// be considered critical, as critical assumptions may be broken. 
     #[test]
     fn test_flags() {
         let precision = 53;
@@ -774,6 +786,35 @@ mod tests {
         assert!(arithmetic_config.precision >= emp_arithmetic_config.precision);
     }
 
+    #[test]
+    fn test_high_precision_eta_arithmetic_config_for_exponential() {
+        let eta = &Eta::new(15, 4, 6).unwrap();
+        let utility_min = 0;
+        let utility_max = 1;
+        let max_outcomes = 1;
+        let arithmetic_config_result = ArithmeticConfig::for_exponential(
+            eta,
+            utility_min,
+            utility_max,
+            max_outcomes,
+            false, 1,
+        );
+        assert!(arithmetic_config_result.is_ok());
+        let arithmetic_config = arithmetic_config_result.unwrap();
+        assert!(arithmetic_config.precision >= 90);
+        
+
+        let emp_arithmetic_config = ArithmeticConfig::for_exponential(
+            eta,
+            utility_min,
+            utility_max,
+            max_outcomes,
+            true, 1,
+        ).unwrap();
+        assert!(arithmetic_config.precision >= emp_arithmetic_config.precision);
+        assert!(53 <= emp_arithmetic_config.precision);
+
+    }
 
 
     #[test]
@@ -793,6 +834,9 @@ mod tests {
         let arithmetic_config = arithmetic_config_result.unwrap();
         assert!(arithmetic_config.precision >= 8);
     }
+
+
+    
 
     #[test]
     fn test_exact_scope() {

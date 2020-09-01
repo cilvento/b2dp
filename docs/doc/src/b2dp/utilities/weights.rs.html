@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/utilities/weights.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>weights.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../b2dp/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/utilities/weights.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>weights.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../b2dp/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
+                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -636,7 +637,7 @@
     <span class="doccomment">/// be determined. Errors occur when calls are made without filling in the required</span>
     <span class="doccomment">/// dependent values in the table. </span>
     <span class="kw">fn</span> <span class="ident">comp_weights</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Key</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">eta</span>: <span class="ident">Eta</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
+        <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// If the value is already in the table, return it</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">w</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
@@ -653,12 +654,12 @@
         <span class="comment">// the i^th element in the target partition x, or a trailing zero if</span>
         <span class="comment">// i &gt; x.len()</span>
         <span class="kw">let</span> <span class="ident">xi</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">x</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">key</span>.<span class="ident">i</span> {
-            <span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>[<span class="ident">key</span>.<span class="ident">i</span>],
-            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+            <span class="bool-val">true</span> <span class="op">=&gt;</span> <span class="ident">x</span>[<span class="ident">key</span>.<span class="ident">i</span>],
+            <span class="bool-val">false</span> <span class="op">=&gt;</span> <span class="number">0</span>,
         };
 
         <span class="comment">// Check if q is the only option</span>
-        <span class="kw">if</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">key</span>.<span class="ident">q</span> {
+        <span class="kw">if</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="op">==</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="op">&amp;&amp;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span>] <span class="op">==</span> <span class="ident">key</span>.<span class="ident">q</span> {
             <span class="comment">// Weight of 1 if q is the only option</span>
             <span class="kw">let</span> <span class="ident">o</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="number">1.0</span>);
             <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">o</span>);
@@ -669,10 +670,10 @@
 
 
         <span class="comment">// Optimized case</span>
-        <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">q</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">key</span>.<span class="ident">i</span>]<span class="op">+</span><span class="number">1</span>  {
+        <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">q</span> <span class="op">&gt;=</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">key</span>.<span class="ident">i</span>]<span class="op">+</span><span class="number">1</span>  {
             <span class="comment">// if q &gt;= x_i + 1, then Delta(q,i) = 1, -1 otherwise</span>
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deltaqi</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>;
-            <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">q</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">xi</span> <span class="op">+</span> <span class="number">1</span> { <span class="ident">deltaqi</span> <span class="op">=</span> <span class="number">1</span>; }
+            <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">q</span> <span class="op">&gt;=</span> <span class="ident">xi</span> <span class="op">+</span> <span class="number">1</span> { <span class="ident">deltaqi</span> <span class="op">=</span> <span class="number">1</span>; }
             <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">get_base</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Key</span> { <span class="ident">q</span>: <span class="ident">key</span>.<span class="ident">q</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">i</span>: <span class="ident">key</span>.<span class="ident">i</span> };
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span>;
@@ -689,7 +690,7 @@
             <span class="comment">// Note: this code is never reached for i &gt;= pb.upper.len()-1, as the</span>
             <span class="comment">// value of q would have been out of bounds, or equal to the terminating</span>
             <span class="comment">// pair. </span>
-            <span class="kw">if</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">&gt;</span><span class="op">=</span> <span class="ident">key</span>.<span class="ident">q</span> { 
+            <span class="kw">if</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">&gt;=</span> <span class="ident">key</span>.<span class="ident">q</span> { 
                 <span class="ident">k</span> <span class="op">=</span> <span class="ident">Key</span> {<span class="ident">q</span>: <span class="ident">key</span>.<span class="ident">q</span>, <span class="ident">i</span>: <span class="ident">key</span>.<span class="ident">i</span><span class="op">+</span><span class="number">1</span>};
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">wt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>) {
                     <span class="ident">w</span> <span class="op">=</span> <span class="ident">wt</span>; 
@@ -709,7 +710,7 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">qprime</span> <span class="op">=</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">key</span>.<span class="ident">i</span><span class="op">+</span><span class="number">1</span>]; 
             <span class="kw">let</span> <span class="ident">bound</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">min</span>(<span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">key</span>.<span class="ident">i</span><span class="op">+</span><span class="number">1</span>], <span class="ident">key</span>.<span class="ident">q</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span>;
-            <span class="kw">while</span> <span class="ident">qprime</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">bound</span> {
+            <span class="kw">while</span> <span class="ident">qprime</span> <span class="op">&lt;=</span> <span class="ident">bound</span> {
                 <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">get_base</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">precision</span>).<span class="ident">unwrap</span>();
                 <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">Key</span> {<span class="ident">q</span>: <span class="ident">qprime</span>, <span class="ident">i</span>: <span class="ident">key</span>.<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span> };
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">wt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>) {
@@ -719,7 +720,7 @@
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing prior value.&quot;</span>.<span class="ident">into</span>());
                 }
                 <span class="ident">val</span> <span class="op">=</span> <span class="ident">val</span> <span class="op">+</span> <span class="ident">base</span>.<span class="ident">pow</span>((<span class="ident">key</span>.<span class="ident">q</span> <span class="op">-</span> <span class="ident">xi</span>).<span class="ident">abs</span>())<span class="kw-2">*</span><span class="ident">w</span>;
-                <span class="ident">qprime</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="ident">qprime</span> <span class="op">+=</span> <span class="number">1</span>;
             }
         }
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>);
@@ -748,7 +749,7 @@
     <span class="doccomment">/// This method does not compute worst-case arithmetic up front, and instead increases</span>
     <span class="doccomment">/// precision as needed during computation. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bounds</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) 
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
+            <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check inputs</span>
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
@@ -808,7 +809,7 @@
     <span class="doccomment">/// beginning with value `q` at index `i`, with INTENTIONALLY INEXACT ARITHMETIC for </span>
     <span class="doccomment">/// comparison and testing purposes only. </span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inexact_from_bounds</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) 
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
+            <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeightTable</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check inputs</span>
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
@@ -847,8 +848,8 @@
     <span class="doccomment">///    be the same target partition that was used to create the table.)</span>
     <span class="doccomment">///  ## Returns</span>
     <span class="doccomment">///  A vector indicating the bias of each index if `x` were the target partition. </span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bias</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> 
-        <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bias</span>(<span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> 
+        <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;&gt;</span>
     {
         <span class="ident">pb</span>.<span class="ident">check</span>()<span class="question-mark">?</span>;
         <span class="comment">// Fill in the total_weights table</span>
@@ -898,21 +899,21 @@
     <span class="doccomment">/// position k.i (P_{q,i}).</span>
     <span class="doccomment">/// TODO: fix messy unwraps</span>
     <span class="kw">fn</span> <span class="ident">get_probability</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Key</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
+        <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check if already computed</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">probabilities</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>) {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="self">self</span>.<span class="ident">probabilities</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>).<span class="ident">unwrap</span>()));
         }
         <span class="comment">// Check if in bounds</span>
-        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&gt;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span>] <span class="op">|</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&lt;</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">k</span>.<span class="ident">i</span>] {
+        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&gt;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span>] <span class="op">||</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&lt;</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">k</span>.<span class="ident">i</span>] {
             <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="number">0</span>);
             <span class="self">self</span>.<span class="ident">probabilities</span>.<span class="ident">insert</span>(<span class="ident">k</span>, <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">p</span>.<span class="ident">prec</span>(), <span class="kw-2">&amp;</span><span class="ident">p</span>));
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">p</span>);
         }
 
         <span class="comment">// Base Case</span>
-        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">i</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">let</span> <span class="ident">ku</span> <span class="op">=</span> <span class="ident">Key</span> { <span class="ident">i</span>: <span class="ident">k</span>.<span class="ident">i</span>, <span class="ident">q</span>: <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span>] };
             <span class="kw">let</span> <span class="ident">tau_u_i</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_total_weight</span>(<span class="ident">ku</span>, <span class="ident">pb</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">w</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>);
@@ -936,7 +937,7 @@
 
     <span class="doccomment">/// Get the coefficient (C_{T,i})</span>
     <span class="kw">fn</span> <span class="ident">get_coefficient</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Key</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
+        <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     {
         <span class="comment">// Check if already computed </span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">coefficients</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">k</span>){
@@ -944,10 +945,10 @@
         }
         <span class="comment">// If k.q is out of bounds, no valid completions so coefficient is zero</span>
         <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&lt;</span> <span class="ident">pb</span>.<span class="ident">lower</span>[<span class="ident">k</span>.<span class="ident">i</span>] { <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="number">0</span>)); }
-        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&gt;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span><span class="op">-</span><span class="number">1</span>] { <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="number">0</span>)); }
+        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&gt;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span><span class="op">-</span><span class="number">1</span>] { <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="number">0</span>)); }
 
         <span class="comment">// Base Case: k.q = upper[k.i-1]</span>
-        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">=</span><span class="op">=</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>] {
+        <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">==</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>] {
             <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_total_weight</span>(<span class="ident">k</span>, <span class="ident">pb</span>);
             <span class="kw">let</span> <span class="ident">km1</span> <span class="op">=</span> <span class="ident">Key</span> { <span class="ident">i</span>: <span class="ident">k</span>.<span class="ident">i</span><span class="op">-</span><span class="number">1</span>, <span class="ident">q</span>: <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span><span class="op">-</span><span class="number">1</span>] };
             <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_probability</span>(<span class="ident">km1</span>, <span class="ident">pb</span>)<span class="question-mark">?</span>;
@@ -973,7 +974,7 @@
     <span class="doccomment">/// Get the total weight (\tau_{T,i}) </span>
     <span class="doccomment">/// TODO: Consider adding error if weight can&#39;t be computed</span>
     <span class="kw">fn</span> <span class="ident">get_total_weight</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">k</span>: <span class="ident">Key</span>, <span class="ident">pb</span>: <span class="kw-2">&amp;</span><span class="ident">PartitionBound</span>) 
-        <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Float</span>
+        <span class="op">-&gt;</span> <span class="ident">Float</span>
     {
 
         <span class="kw">if</span> <span class="ident">k</span>.<span class="ident">q</span> <span class="op">&gt;</span> <span class="ident">pb</span>.<span class="ident">upper</span>[<span class="ident">k</span>.<span class="ident">i</span>] { 
@@ -1105,8 +1106,8 @@
         }
 
         <span class="comment">// Swap one count</span>
-        <span class="ident">x</span>[<span class="number">0</span>]<span class="op">-</span><span class="op">=</span><span class="number">1</span>;
-        <span class="ident">x</span>[(<span class="ident">n</span> <span class="kw">as</span> <span class="ident">usize</span>)<span class="op">/</span><span class="number">2</span>]<span class="op">+</span><span class="op">=</span><span class="number">1</span>;
+        <span class="ident">x</span>[<span class="number">0</span>]<span class="op">-=</span><span class="number">1</span>;
+        <span class="ident">x</span>[(<span class="ident">n</span> <span class="kw">as</span> <span class="ident">usize</span>)<span class="op">/</span><span class="number">2</span>]<span class="op">+=</span><span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">pb</span> <span class="op">=</span> <span class="ident">PartitionBound</span>::<span class="ident">from_dist</span>(<span class="ident">d</span>, <span class="kw-2">&amp;</span><span class="ident">x</span>, <span class="ident">total_count</span> <span class="kw">as</span> <span class="ident">usize</span>,<span class="ident">total_cells</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">wt</span> <span class="op">=</span> <span class="ident">WeightTable</span>::<span class="ident">from_bounds</span>(<span class="ident">eta</span>, <span class="kw-2">&amp;</span><span class="ident">pb</span>, <span class="kw-2">&amp;</span><span class="ident">x</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">wt_inexact</span> <span class="op">=</span> <span class="ident">WeightTable</span>::<span class="ident">inexact_from_bounds</span>(<span class="ident">eta</span>, <span class="kw-2">&amp;</span><span class="ident">pb</span>, <span class="kw-2">&amp;</span><span class="ident">x</span>).<span class="ident">unwrap</span>();
@@ -1147,7 +1148,7 @@
             <span class="kw">let</span> <span class="ident">z</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">53</span>,<span class="number">0</span>);
             <span class="kw">let</span> <span class="ident">true_weight</span> <span class="op">=</span> <span class="ident">wt</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="ident">k</span>).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">inex_weight</span> <span class="op">=</span> <span class="ident">wt_inexact</span>.<span class="ident">weights</span>.<span class="ident">get</span>(<span class="ident">k</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="ident">z</span>);
-            <span class="kw">if</span> <span class="ident">inex_weight</span>.<span class="ident">is_zero</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="op">!</span><span class="ident">true_weight</span>.<span class="ident">is_zero</span>() { <span class="ident">zero_round</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>; }
+            <span class="kw">if</span> <span class="ident">inex_weight</span>.<span class="ident">is_zero</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">true_weight</span>.<span class="ident">is_zero</span>() { <span class="ident">zero_round</span> <span class="op">+=</span> <span class="number">1</span>; }
             <span class="kw">let</span> <span class="ident">diff</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">53</span>,<span class="ident">true_weight</span><span class="op">-</span><span class="ident">inex_weight</span>);
             <span class="ident">total_diff</span> <span class="op">=</span> <span class="ident">total_diff</span> <span class="op">+</span> <span class="ident">diff</span>;
             <span class="ident">total_weight</span> <span class="op">=</span> <span class="ident">total_weight</span> <span class="op">+</span> <span class="ident">true_weight</span>;
@@ -1158,4 +1159,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "b2dp";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "b2dp";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

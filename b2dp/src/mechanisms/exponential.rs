@@ -110,6 +110,9 @@ impl ExponentialConfig {
         Ok(config)
     }
 
+    /// Wrapper function for `Eta::get_base`. Returns 
+    /// `eta.get_base()` using the precision specified by 
+    /// `self.arithmetic_config`. 
     pub fn get_base(&self) -> Float {
         self.eta.get_base(self.arithmetic_config.precision).unwrap()
     }
