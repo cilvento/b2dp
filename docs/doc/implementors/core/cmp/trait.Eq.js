@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["b2dp"] = [{"text":"impl Eq for Key","synthetic":false,"types":[]}];
+implementors["b2dp"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html\" title=\"trait core::cmp::Eq\">Eq</a> for <a class=\"struct\" href=\"b2dp/utilities/weights/struct.Key.html\" title=\"struct b2dp::utilities::weights::Key\">Key</a>","synthetic":false,"types":["b2dp::utilities::weights::Key"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

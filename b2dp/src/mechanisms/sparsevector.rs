@@ -31,7 +31,8 @@ use crate::errors::*;
 /// 
 /// ## Returns
 /// A vector of `bool` with at most `c` `true` entries indicating which queries 
-/// exceeded the noisy threshold. 
+/// exceeded the noisy threshold or an error if insufficient precision to do
+/// so. 
 /// 
 /// ## Exact Arithmetic
 /// This method calls `enter_exact_scope` which clears the `mpfr::flags`. 
@@ -54,27 +55,60 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
     let mut count = 0;
     
     // Get an arithmetic_config to keep track of required precision
-    let mut arithmetic_config = ArithmeticConfig::basic()?;
-    // enter exact scope
-    arithmetic_config.enter_exact_scope()?;
-    // Check gamma and adjustments to ensure sufficient precision
-    // `adjust_eta` also checks for validity of gamma and that
-    // g_inv is integer. 
-    let mut g = arithmetic_config.get_float(gamma);
-    let mut g_inv = arithmetic_config.get_float(1.0/gamma);
-    let _eta1_prime = adjust_eta(eta1, &g_inv, & mut arithmetic_config)?; 
-    let _eta2_prime = adjust_eta(eta2, &g_inv, & mut arithmetic_config)?;
+    let mut arithmetic_config = ArithmeticConfig::basic()?;    
+    let mut g; 
+    let mut g_inv; 
 
-    // If inexact arithmetic performed, increase precision and try again
-    while arithmetic_config.exit_exact_scope().is_err() {
-        arithmetic_config.increase_precision(16)?; // increase precision
-        arithmetic_config.inexact_arithmetic = false; // reset the inexact arithmetic flag on the configuration
-        arithmetic_config.enter_exact_scope()?; // re-enter the exact scope, and try again
+    // Loop until test computations complete successfully
+    loop {
+        arithmetic_config.enter_exact_scope()?;
+        // Check gamma and adjustments to ensure sufficient precision
+        // `adjust_eta` also checks for validity of gamma and that
+        // g_inv is integer.
         g = arithmetic_config.get_float(gamma);
         g_inv = arithmetic_config.get_float(1.0/gamma);
         let _eta1_prime = adjust_eta(eta1, &g_inv, & mut arithmetic_config)?;
         let _eta2_prime = adjust_eta(eta2, &g_inv, & mut arithmetic_config)?;
+        
+        // Try to sample rho
+        let _rho = sample_within_bounds(eta1,
+            &arithmetic_config.get_float(&g),
+            &arithmetic_config.get_float(query_min - w),
+            &arithmetic_config.get_float(query_max + w),
+            &mut arithmetic_config,
+            rng,
+            optimize);
+
+        // Compute maximum and minimum possible calls to noisy_threshold()
+        // which will result from `query_min - w` and 
+        // `query_max + w`
+        let mut thresh = arithmetic_config.get_float(query_min - w);
+        let mut _test = noisy_threshold(eta2,
+            & mut arithmetic_config,
+            &g_inv,
+            &thresh,
+            rng,
+            optimize);
+
+        thresh = arithmetic_config.get_float(query_max + w);
+        _test = noisy_threshold(eta2,
+            & mut arithmetic_config,
+            &g_inv,
+            &thresh,
+            rng,
+            optimize);
+        let ex = arithmetic_config.exit_exact_scope();
+        // If computations suceeded, exit the loop
+        if ex.is_ok() { break; }
+        // Otherwise, increase precision and try again
+        // `increase_precision` gives an error if max system 
+        // precision is exceeded.
+        arithmetic_config.increase_precision(16)?; 
+        // reset the inexact arithmetic flag on the configuration
+        arithmetic_config.inexact_arithmetic = false; 
+
     }
+    
     // re-enter the exact scope after appropriate precision determined
     arithmetic_config.enter_exact_scope()?;
 
@@ -95,6 +129,7 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
                                     &mut arithmetic_config,
                                     rng,
                                     optimize)?;
+
     // Iterate through queries 
     for i in 0..query_values.len() {
         // Clamp Q[i] if needed
@@ -102,6 +137,7 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
         if query_values[i] > query_max { q = arithmetic_config.get_float(query_max); }
         else if query_values[i] < query_min { q = arithmetic_config.get_float(query_min); }
         else { q = arithmetic_config.get_float(query_values[i]); }
+
         // Check that q is a multiple of gamma
         if !is_multiple_of(&q,&g) { 
             // Round
@@ -109,7 +145,6 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
             m.round_mut(); 
             q = arithmetic_config.get_float(&g*&m);
         }
-    
 
         // Compute rho hat
         let rho_hat: Float;
@@ -121,14 +156,28 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
 
         // Run noisy threshold
         let g_inv = arithmetic_config.get_float(1.0/gamma);
-        let a = noisy_threshold(eta2,& mut arithmetic_config,&g_inv,&rho_hat,rng,optimize)?;
+        // Noisy threshold for `rho - query_values[i]` 
+        let thresh = arithmetic_config.get_float(&rho_hat - &q);
+        
+        let a = noisy_threshold(eta2,
+                                & mut arithmetic_config,
+                                &g_inv,
+                                &thresh,
+                                rng,
+                                optimize)?;
         if a.is_infinite() && a.is_sign_positive() { 
             outputs.push(true); 
             count += 1;
-            if count >= c { return Ok(outputs); } // if we have already encountered c positives, stop
+            // if we have already encountered c positives, stop
+            if count >= c { return Ok(outputs); } 
         }
-        else if a.is_infinite() && a.is_sign_negative() { outputs.push(false); }
+        // Otherwise, output false
+        else { outputs.push(false); }
+        
     }
+    // Exit the exact scope and check if inexact arithmetic
+    arithmetic_config.exit_exact_scope()?;
+
     return Ok(outputs);
 }
 
@@ -144,15 +193,91 @@ mod tests {
         let eta1 = Eta::new(1,1,2).unwrap();
         let eta2 = Eta::new(1,1,2).unwrap();
         let c = 2;
-        let queries = vec![1.0,2.0,3.0,4.0,5.0,1.0];
+        let queries = vec![-10.0, // Should be clamped based on q_min
+                           -1.0,
+                           5.0, // Very likely to be positive
+                           -5.0,
+                           0.0,
+                           -2.0,
+                           1.0,
+                           -2.0,
+                           -3.0,
+                           -4.0,
+                           5.0,
+                           1.0];
         let gamma = 0.5;
-        let q_min = 0.0;
+        let q_min = -5.0;
         let q_max = 6.0;
-        let w = 5.0;
+        let w = 10.0;
         let rng = GeneratorOpenSSL {};
         let optimize = false;
         let outputs = sparse_vector(eta1, eta2, c, &queries, gamma, q_min, q_max, w, rng, optimize);
         assert!(outputs.is_ok());
-        println!("{:?}", outputs);
+        let outputs = outputs.unwrap();
+        assert!(outputs.len() >= c); // Should always pass.
+        println!("\n{:?}", outputs);
+    }
+
+    #[test]
+    fn test_few_positives_sparse_vector(){
+        let eta1 = Eta::new(1,1,2).unwrap();
+        let eta2 = Eta::new(1,1,2).unwrap();
+        let c = 3;
+        // All queries are true negatives, very few should
+        // be positive. Tests that zero or too few positives
+        // behavior is correct. 
+        let queries = vec![-10.0, // Should be clamped based on q_min
+                           -4.0,
+                           -5.0, 
+                           -5.0,
+                           -2.0,
+                           -4.0,
+                           -2.0,
+                           -3.0,
+                           -4.0,
+                           -5.0,
+                           -1.0];
+        let gamma = 0.5;
+        let q_min = -5.0;
+        let q_max = 6.0;
+        let w = 10.0;
+        let rng = GeneratorOpenSSL {};
+        let optimize = false;
+        let outputs = sparse_vector(eta1, eta2, c, &queries, gamma, q_min, q_max, w, rng, optimize);
+        assert!(outputs.is_ok());
+        let outputs = outputs.unwrap();
+        assert!(outputs.len() >= c); // Should always pass.
+        assert!(outputs.len() > 6);  // May fail with very small probability
+        println!("\n{:?}", &outputs);
+    }
+
+    #[test]
+    fn test_sparse_vector_precision(){
+        let eta1 = Eta::new(1,1,2).unwrap();
+        let eta2 = Eta::new(1,1,2).unwrap();
+        let c = 2;
+        let queries = vec![-10.0, // Should be clamped based on q_min
+                           -1.0,
+                           5.0, // Very likely to be positive
+                           -5.0,
+                           0.0,
+                           -2.0,
+                           1.0,
+                           -2.0,
+                           -3.0,
+                           -4.0,
+                           5.0,
+                           1.0];
+        let gamma = 0.5;
+        let q_min = -50.0; // Larger range of q_min, q_max and 
+        let q_max = 60.0;  // w will require greater precision
+        let w = 100.0;     // than default.
+        let rng = GeneratorOpenSSL {};
+        let optimize = false;
+        let outputs = sparse_vector(eta1, eta2, c, &queries, gamma, q_min, q_max, w, rng, optimize);
+        assert!(outputs.is_ok());
+        let outputs = outputs.unwrap();
+        assert!(outputs.len() >= c); // Should always pass.
+        println!("\n{:?}", outputs);
     }
 }

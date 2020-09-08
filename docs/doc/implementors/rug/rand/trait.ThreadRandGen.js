@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["b2dp"] = [{"text":"impl ThreadRandGen for GeneratorOpenSSL","synthetic":false,"types":[]}];
+implementors["b2dp"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/rug/~1.8/rug/rand/trait.ThreadRandGen.html\" title=\"trait rug::rand::ThreadRandGen\">ThreadRandGen</a> for <a class=\"struct\" href=\"b2dp/utilities/randomness/struct.GeneratorOpenSSL.html\" title=\"struct b2dp::utilities::randomness::GeneratorOpenSSL\">GeneratorOpenSSL</a>","synthetic":false,"types":["b2dp::utilities::randomness::GeneratorOpenSSL"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
