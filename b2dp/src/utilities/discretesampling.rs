@@ -51,18 +51,21 @@ pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
 /// 
 /// ## Example Usage 
 /// ```
-/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};
+/// # use b2dp::{Eta,GeneratorOpenSSL,
+/// #    utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};
 /// # use rug::Float;
 /// # use b2dp::errors::*;
 /// # fn main() -> Result<()> {
-/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
+/// // construct eta that can be adjusted for the desired value of gamma.
+/// let eta = Eta::new(1,1,2)?; 
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
 /// let gamma = arithmeticconfig.get_float(0.5);
 /// let wmin = arithmeticconfig.get_float(-5);
 /// let wmax = arithmeticconfig.get_float(5);
 /// arithmeticconfig.enter_exact_scope()?;
-/// let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, & mut arithmeticconfig, rng,false)?;
+/// let s = sample_within_bounds(eta, &gamma, &wmin, &wmax, 
+///                              & mut arithmeticconfig, rng,false)?;
 /// let b = arithmeticconfig.exit_exact_scope();
 /// assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. 
 /// # Ok(())
@@ -75,9 +78,15 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
     -> Result<Float>
 {
     // Check inputs
-    if wmax <= wmin { return Err("`wmin` must be strictly less than `wmax`.".into()); }
-    if !is_multiple_of(&wmin, &gamma) { return Err("`wmin` is not integer multiple of `gamma`.".into()); }
-    if !is_multiple_of(&wmax, &gamma) { return Err("`wmax` is not integer multiple of `gamma`.".into()); }
+    if wmax <= wmin { 
+        return Err("`wmin` must be strictly less than `wmax`.".into()); 
+    }
+    if !is_multiple_of(&wmin, &gamma) { 
+        return Err("`wmin` is not integer multiple of `gamma`.".into()); 
+    }
+    if !is_multiple_of(&wmax, &gamma) { 
+        return Err("`wmax` is not integer multiple of `gamma`.".into()); 
+    }
     let t_min = arithmeticconfig.get_float(wmin/gamma);
     let t_max = arithmeticconfig.get_float(wmax/gamma);
 
@@ -106,8 +115,10 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
     let r = normalized_sample(&region_weights,arithmeticconfig,rng,optimize)?;
 
     match r { 
-        0 => return Ok(arithmeticconfig.get_float(Special::NegInfinity)),  // lower region
-        1 => return Ok(arithmeticconfig.get_float(Special::Infinity)),     // upper region
+        // lower region
+        0 => return Ok(arithmeticconfig.get_float(Special::NegInfinity)),  
+        // upper region
+        1 => return Ok(arithmeticconfig.get_float(Special::Infinity)),     
         _=> (), // Must sample from the middle region 
     }
     // Sample from the middle region
@@ -140,8 +151,8 @@ pub fn sample_within_bounds<R: ThreadRandGen+Copy>(eta: Eta, gamma: &Float,
 /// ## Arguments
 /// * `eta`: privacy parameter
 /// * `gamma_inv`: an integer-valued Float representing the inverse of `gamma`
-/// * `arithmeticconfig`: an ArithmeticConfig with sufficient precision to adjust
-///    `eta` if it can be adjusted. 
+/// * `arithmeticconfig`: an ArithmeticConfig with sufficient precision to 
+///       adjust `eta` if it can be adjusted. 
 /// 
 /// ## Returns
 /// A new `Eta` adjusted such that `2^eta_prime = (2^eta)^gamma` or an error
@@ -153,7 +164,9 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
     -> Result<Eta>//,&'static str> 
 {
     // Check that gamma is valid for the given eta
-    if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer.".into()); }
+    if !gamma_inv.is_integer() { 
+        return Err("`gamma_inv` must be an integer.".into()); 
+    }
     let gamma = arithmeticconfig.get_float(1.0/gamma_inv);
     // Check if eta.z is divisible by gamma_inv.
     let mut z_prime = eta.z; 
@@ -172,13 +185,18 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
         let fx = arithmeticconfig.get_float(eta.x);
         let fy = arithmeticconfig.get_float(eta.y);
         
-        if !is_multiple_of(&fy, &gamma) {return Err("Unable to adjust for gamma (y).".into());}
+        if !is_multiple_of(&fy, &gamma) {
+            return Err("Unable to adjust for gamma (y).".into());
+        }
         let rooty = arithmeticconfig.get_float(fy*&gamma);
         
         let rootx = arithmeticconfig.get_float(fx.pow(&gamma));
-        if !rootx.is_integer() {return Err("Unable to adjust for gamma (x).".into());}
+        if !rootx.is_integer() {
+            return Err("Unable to adjust for gamma (x).".into());
+        }
         
-        x_prime = rootx.to_integer().unwrap().to_u32().unwrap(); // TODO: more elegant error handling
+        // TODO: more elegant error handling
+        x_prime = rootx.to_integer().unwrap().to_u32().unwrap(); 
         y_prime = rooty.to_integer().unwrap().to_u32().unwrap();
     }
     let eta_prime = Eta::new(x_prime,y_prime,z_prime)?;
@@ -186,8 +204,8 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 
 }
 
-/// Determines whether the discretized Laplace exceeds the given threshold conditioned
-/// on it exceeding the given conditional threshold.
+/// Determines whether the discretized Laplace exceeds the given 
+/// threshold conditioned on it exceeding the given conditional threshold.
 /// ## Arguments
 ///   * `eta`: the privacy parameter
 ///   * `arithmeticconfig`: ArithmeticConfig with sufficient precision
@@ -198,17 +216,20 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 ///   * `optimize`: whether to optimize sampling, exacerbates timing channels
 /// 
 /// ## Returns
-/// Returns a `Float` with value `Special::Infinity` if greater than or equal to the threshold,
-/// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot
-/// be appropriately adjusted or sum computation fails. 
+/// Returns a `Float` with value `Special::Infinity` if greater than or equal
+/// to the threshold, otherwise returns with value `Special::NegInfinity`. 
+/// Returns an error if `eta` cannot be appropriately adjusted or sum 
+/// computation fails. 
 /// 
 /// ## Exact Arithmetic
-/// Does not explicitly enforce exact arithmetic, this is the caller's responsibility.
+/// Does not explicitly enforce exact arithmetic, this is the caller's 
+/// responsibility.
 /// 
 /// ## Privacy Budget
 /// Uses `eta` privacy budget. Note that if multiple calls of conditional threshold are made
-/// in a chain, i.e., cond_threshold(T_0,T_1); cond_threshold(T_1,T_2) then the privacy budget
-/// may be shared among these calls. This accounting must be used with caution. 
+/// in a chain, i.e., cond_threshold(T_0,T_1); cond_threshold(T_1,T_2) then the 
+/// privacy budget may be shared among these calls. This accounting must be 
+/// used with caution. 
 /// 
 /// ## Timing Channels
 /// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
@@ -216,18 +237,23 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// 
 /// ## Example Usage
 /// ```
-/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, conditional_noisy_threshold};
+/// # use b2dp::{Eta,GeneratorOpenSSL,
+/// #            utilities::exactarithmetic::ArithmeticConfig, 
+/// #            conditional_noisy_threshold};
 /// # use rug::Float;
 /// # use b2dp::errors::*;
 /// # fn main() -> Result<()> {
-/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
+/// // construct eta that can be adjusted for the desired value of gamma.
+/// let eta = Eta::new(1,1,2)?; 
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
 /// let gamma_inv = arithmeticconfig.get_float(2);
 /// let cond_threshold = arithmeticconfig.get_float(0);
 /// let threshold = arithmeticconfig.get_float(1);
 /// arithmeticconfig.enter_exact_scope()?; 
-/// let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false)?;
+/// let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, 
+///                                     &gamma_inv, &threshold, 
+///                                     &cond_threshold, rng, false)?;
 /// assert!(!s.is_finite()); // returns plus or minus infinity
 /// if s.is_sign_positive() { /* Greater than the threshold */ ;}
 /// else { /* Less than the threshold. */ ;}
@@ -259,14 +285,20 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 
     // Check that cond_threshold is less than threshold
     if cond_threshold > threshold {
-        return Err("conditional threshold must be smaller than threshold.".into());
+        return Err("conditional threshold must be smaller than threshold."
+                .into());
     }
     else if cond_threshold == threshold {
         return Ok(plus_infty); // The value already equals the threshold
     }
     // Check that thresholds are integer multiples of gamma
-    if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`.".into()); }
-    if !is_multiple_of(&cond_threshold, &gamma)  { return Err("`cond_threshold` must be integer multiple of `gamma`.".into()); }
+    if !is_multiple_of(&threshold, &gamma)  { 
+        return Err("`threshold` must be integer multiple of `gamma`.".into()); 
+    }
+    if !is_multiple_of(&cond_threshold, &gamma)  { 
+        return Err("`cond_threshold` must be integer multiple of `gamma`."
+        .into()); 
+    }
     let t = arithmeticconfig.get_float(threshold*gamma_inv); 
 
     // Sum of weights above the threshold
@@ -302,13 +334,16 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 ///   * `optimize`: whether to optimize sampling, exacerbates timing channels
 /// 
 /// ## Returns
-/// Returns a `Float` with value `Special::Infinity` if draw from the discrete Laplace is 
-/// greater than or equal to the threshold,
-/// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot
-/// be appropriately adjusted or sum computation fails. 
+/// Returns a `Float` with value `Special::Infinity` if draw from the discrete 
+/// Laplace is greater than or equal to the threshold,
+/// otherwise returns with value `Special::NegInfinity`. 
+/// 
+/// Returns an error if `eta` cannot be appropriately adjusted or sum 
+/// computation fails. 
 /// 
 /// ## Exact Arithmetic
-/// Does not explicitly enforce exact arithmetic, this is the caller's responsibility.
+/// Does not explicitly enforce exact arithmetic, this is the caller's 
+/// responsibility.
 /// 
 /// ## Privacy Budget
 /// Uses `eta` privacy budget
@@ -319,17 +354,20 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// 
 /// ## Example Usage
 /// ```
-/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};
+/// # use b2dp::{Eta,GeneratorOpenSSL,
+/// # utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};
 /// # use rug::Float;
 /// # use b2dp::errors::*;
 /// # fn main() -> Result<()> {
-/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.
+/// // construct eta that can be adjusted for the desired value of gamma.
+/// let eta = Eta::new(1,1,2)?; 
 /// let mut arithmeticconfig = ArithmeticConfig::basic()?;
 /// let rng = GeneratorOpenSSL {};
 /// let gamma_inv = arithmeticconfig.get_float(2);
 /// let threshold = arithmeticconfig.get_float(0);
 /// arithmeticconfig.enter_exact_scope()?; 
-/// let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false)?;
+/// let s = noisy_threshold(eta, & mut arithmeticconfig, 
+///                         &gamma_inv, &threshold, rng, false)?;
 /// assert!(!s.is_finite()); // returns plus or minus infinity
 /// if s.is_sign_positive() { /* Greater than the threshold */ ;}
 /// else { /* Less than the threshold. */ ;}
@@ -338,8 +376,12 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// # Ok(())
 /// # }
 /// ```
-pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut ArithmeticConfig, gamma_inv: &Float, threshold: &Float,
-                        rng: R, optimize: bool) 
+pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, 
+                                    arithmeticconfig: & mut ArithmeticConfig, 
+                                    gamma_inv: &Float, 
+                                    threshold: &Float,
+                                    rng: R, 
+                                    optimize: bool) 
     -> Result<Float>
     { 
         // plus and minus infinity
@@ -352,11 +394,16 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
         let base = eta_prime.get_base(arithmeticconfig.precision)?;
         
         // Check that gamma is valid (integer reciprocal)
-        if !gamma_inv.is_integer() { return Err("`gamma_inv` must be an integer.".into()); }
+        if !gamma_inv.is_integer() { 
+            return Err("`gamma_inv` must be an integer.".into()); 
+        }
         let gamma = arithmeticconfig.get_float(1/gamma_inv);
 
         // Check that threshold is integer multiple of gamma
-        if !is_multiple_of(&threshold, &gamma)  { return Err("`threshold` must be integer multiple of `gamma`.".into()); }
+        if !is_multiple_of(&threshold, &gamma)  { 
+            return Err("`threshold` must be integer multiple of `gamma`."
+            .into()); 
+        }
         let t = arithmeticconfig.get_float(threshold*gamma_inv); 
 
         let p_top = get_sum(&base,
@@ -381,100 +428,97 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, arithmeticconfig: & mut Arith
 
 
 /// Returns the sum: 
-/// 0.5*(1-base)^{-1}*\sum_{k=start}^{end}base^{|k|}
+/// (1-base)*\sum_{k=start}^{end}base^{|k|}
 /// 
 /// ## Arguments:
 ///   * `base`: a `Float` indicating the base for the sum
 ///   * `arithmeticconfig`: an ArithmeticConfig  
-///   * `start`: an integer-valued or infinite `Float` indicating the starting point of the sum
-///   * `end`: an integer-valued or infinite `Float` indicating the ending point of the sum
+///   * `start`: an integer-valued or infinite `Float` indicating the starting 
+///              point of the sum
+///   * `end`: an integer-valued or infinite `Float` indicating the ending 
+///            point of the sum
 /// 
 /// ## Returns
-/// Either the sum or an error if parameters are mis-specified. This method does not explicitly check
-/// for inexact arithmetic, it is the caller's responsibility to do so. 
+/// Either the sum or an error if parameters are mis-specified. This method 
+/// does not explicitly check for inexact arithmetic, it is the caller's 
+/// responsibility to do so. 
 /// 
 /// ## Exact Arithmetic
-/// This method does not enforce exact arithmetic, this is the caller's responsibility. 
+/// This method does not enforce exact arithmetic, this is the caller's 
+/// responsibility. 
 /// 
 /// ## Timing channels
-/// The recursive calls to `get_sum` introduce a timing channel distinguishing whether
-/// `start` and `end` cross zero. 
+/// The recursive calls to `get_sum` introduce a timing channel distinguishing
+///  whether `start` and `end` cross zero. 
 pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: &Float, end: &Float) 
     -> Result<Float>
 {
     // Check ordering
-    if start >= end { return Err("`start` must be strictly less than `end`.".into()); }
+    if start >= end { 
+        return Err("`start` must be strictly less than `end`.".into()); 
+    }
     // Check integrality
-    if (!start.is_integer() && start.is_finite()) || // infinite values are not considered integers
-        (!end.is_integer() && end.is_finite()) { 
-        return Err("`start` and `end` must be integer values or infinite.".into());
+    if (!start.is_integer() && start.is_finite()) || // infinite values are not 
+        (!end.is_integer() && end.is_finite()) {     // considered integers
+        return Err("`start` and `end` must be integer values or infinite."
+               .into());
     }
 
     // Check base magnitude
     if *base >= 1 { return Err("`base` must be less than 1.".into()); }
 
+    // Sum components
+    let abs_end = arithmeticconfig.get_float(end).abs();
+    let abs_start = arithmeticconfig.get_float(start).abs();
+    let end_plus_one = arithmeticconfig.get_float(&abs_end + 1);
+    let start_plus_one = arithmeticconfig.get_float(&abs_start + 1);
+    let pow_end_plus_one = arithmeticconfig.get_float(base).pow(end_plus_one);
+    let pow_start_plus_one = arithmeticconfig.get_float(base).pow(start_plus_one);
+    // base^(|end|)
+    let pow_end = arithmeticconfig.get_float(base).pow(abs_end); 
+    // base^(|start|)
+    let pow_start = arithmeticconfig.get_float(base).pow(abs_start); 
+    let base_plus_one = arithmeticconfig.get_float(1+base);
+    
     // Check for negative infinity case
     if start.is_infinite() && start.is_sign_negative() {
 
         if end.is_infinite() && end.is_sign_positive() {
             // Full infinite sum 
-            // = 0.5*(1+base)
-            let base_plus_one = arithmeticconfig.get_float(1+base); 
-            return Ok(arithmeticconfig.get_float(0.5 * base_plus_one));
+            // = (1+base)
+            return Ok(base_plus_one);
         }
 
-        // Half-open infinite sum
-        let m = arithmeticconfig.get_float(end);
-        let abs_end = m.abs();
+        // Half-open infinite sum [-infinity, end]
         if *end < 0 {
-            // Same sign
-            // = 0.5 - 0.5*(1-base^(|end|)) 
-            let p = arithmeticconfig.get_float(base).pow(abs_end); // base^(|end|)
-            let s = arithmeticconfig.get_float(0.5 - 0.5*(1-p));
+            // = base^(|end|)  
+            let s = arithmeticconfig.get_float(pow_end);
             return Ok(s);
         }
         else {
-            // Different sign
-            // = 0.5 + 0.5*base - 0.5*base^(|end| + 1)
-            let end_plus_one = arithmeticconfig.get_float(abs_end + 1);
-            let p = arithmeticconfig.get_float(base).pow(end_plus_one); // base^(|end|+1)
-            let half_base = arithmeticconfig.get_float(0.5*base);
-            let s = arithmeticconfig.get_float(0.5 + half_base - 0.5*p);
+            // = 1  + base - base^(|end| + 1)
+            let s = arithmeticconfig.get_float(base_plus_one - pow_end_plus_one);
             return Ok(s);
         }
 
     }
     // Half-open positive infinite sum
     else if end.is_infinite() && end.is_sign_positive() {
-        let m = arithmeticconfig.get_float(start);
-        let abs_start = m.abs();
-    
-        // Half-open infinite sum
+        // Half-open infinite sum [start, +infinity]
         if *start > 0 {
-            // Same sign
-            // = 0.5 - 0.5*(1-base^(|start|))
-            let p = arithmeticconfig.get_float(base).pow(abs_start); // base^(|start|)
-           
-            
-            let s = arithmeticconfig.get_float(0.5 - 0.5*(1-p));
+            let s = arithmeticconfig.get_float(pow_start);
             return Ok(s);
         }
         else {
-            // Different sign
-            // = 0.5 + 0.5*base - 0.5*base^(|start| + 1)
-            let start_plus_one = arithmeticconfig.get_float(abs_start + 1);
-           
-            let p = arithmeticconfig.get_float(base).pow(start_plus_one); // base^(|start|+1)
-           
-            let half_base = arithmeticconfig.get_float(0.5*base);
-            let s = arithmeticconfig.get_float(0.5 + half_base - 0.5*p);
+            let s = arithmeticconfig.get_float(base_plus_one - pow_start_plus_one);
             return Ok(s);
         }
     }
     
     
     // Otherwise, finite sum, recurse 
-    // = get_sum(-infinity,infinity) - get_sum(-infinity, start - 1) - get_sum(end + 1, infinity)
+    // = get_sum(-infinity,infinity) - get_sum(-infinity, start - 1) 
+    //   - get_sum(end + 1, infinity)
     let plus_infty = arithmeticconfig.get_float(Special::Infinity);
     let neg_infty = arithmeticconfig.get_float(Special::NegInfinity);
     
@@ -698,90 +742,89 @@ mod tests {
         // Complete infinite sum
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.75);
+        assert_eq!(s,1.5); // 1 + Base
 
         // [0,infinity]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 0), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.5);
+        assert_eq!(s,1.0); 
         
         // [-infinity, 0]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, 0)).unwrap();
-        assert_eq!(s,0.5);
+        assert_eq!(s,1.0);
 
         // [1,infinity]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.25);
+        assert_eq!(s,0.5);
 
         // [-1,infinity]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -1), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.625);
+        assert_eq!(s,1.25);
 
         // [-infinity,-1]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, -1)).unwrap();
-        assert_eq!(s,0.25);
+        assert_eq!(s,0.5);
 
         // [-infinity,1]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, 1)).unwrap();
-        assert_eq!(s,0.625);
+        assert_eq!(s,1.25);
 
         // [1,5]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1),&Float::with_val(32, 5)).unwrap();
-        assert_eq!(s,0.2421875);
+        assert_eq!(s,0.484375);
 
         // [-5,5]
         let base = arithmeticconfig.get_float(0.5);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -5),&Float::with_val(32, 5)).unwrap();
-        assert_eq!(s,0.734375);
+        assert_eq!(s,1.46875);
 
 
         // base = 0.1 
         // Complete infinite sum
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.55);
+        assert_eq!(s,1.1);
 
         // [0,infinity]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 0), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.5);
+        assert_eq!(s,1.0);
         
         // [-infinity, 0]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity), &Float::with_val(32, 0)).unwrap();
-        assert_eq!(s,0.5);
+        assert_eq!(s,1.0);
 
         // [1,infinity]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert!(s.to_f64()-0.05 < 0.001); // result not exact, test case only
+        assert_eq!(s,0.1); // result not exact, test case only
 
         // [-1,infinity]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, -1), &Float::with_val(32, Special::Infinity)).unwrap();
-        assert_eq!(s,0.545);
+        assert_eq!(s,1.09);
 
         // [-infinity,-1]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, -1)).unwrap();
-        assert!(s.to_f64()-0.05 < 0.001); // result not exact, test case only
+        assert_eq!(s,0.1); // result not exact, test case only
 
         // [-infinity,1]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, Special::NegInfinity),&Float::with_val(32, 1)).unwrap();
-        assert_eq!(s,0.545);
+        assert_eq!(s,1.09);
 
         // [1,5]
         let base = arithmeticconfig.get_float(0.1);
         let s = get_sum(&base, &arithmeticconfig, &Float::with_val(32, 1),&Float::with_val(32, 5)).unwrap();
-        assert!(s.to_f64()- 0.499995< 0.001);// result not exact, test case only
-
+        assert!(s.to_f64()- 0.099999 < 0.001);// result not exact, test case only
 
     }
 

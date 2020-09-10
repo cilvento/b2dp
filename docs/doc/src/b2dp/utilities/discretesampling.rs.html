@@ -803,6 +803,49 @@
 <span id="803">803</span>
 <span id="804">804</span>
 <span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements discrete sampling methods in base-2</span>
 <span class="doccomment">//! including [`noisy_threshold`](./fn.noisy_threshold.html) and </span>
@@ -857,18 +900,21 @@
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage </span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};</span>
+<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,</span>
+<span class="doccomment">/// #    utilities::exactarithmetic::ArithmeticConfig, sample_within_bounds};</span>
 <span class="doccomment">/// # use rug::Float;</span>
 <span class="doccomment">/// # use b2dp::errors::*;</span>
 <span class="doccomment">/// # fn main() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// let eta = Eta::new(1,1,2)?; </span>
 <span class="doccomment">/// let mut arithmeticconfig = ArithmeticConfig::basic()?;</span>
 <span class="doccomment">/// let rng = GeneratorOpenSSL {};</span>
 <span class="doccomment">/// let gamma = arithmeticconfig.get_float(0.5);</span>
 <span class="doccomment">/// let wmin = arithmeticconfig.get_float(-5);</span>
 <span class="doccomment">/// let wmax = arithmeticconfig.get_float(5);</span>
 <span class="doccomment">/// arithmeticconfig.enter_exact_scope()?;</span>
-<span class="doccomment">/// let s = sample_within_bounds(eta, &amp;gamma, &amp;wmin, &amp;wmax, &amp; mut arithmeticconfig, rng,false)?;</span>
+<span class="doccomment">/// let s = sample_within_bounds(eta, &amp;gamma, &amp;wmin, &amp;wmax, </span>
+<span class="doccomment">///                              &amp; mut arithmeticconfig, rng,false)?;</span>
 <span class="doccomment">/// let b = arithmeticconfig.exit_exact_scope();</span>
 <span class="doccomment">/// assert!(b.is_ok()); // Must check that no inexact arithmetic was performed. </span>
 <span class="doccomment">/// # Ok(())</span>
@@ -881,9 +927,15 @@
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
 {
     <span class="comment">// Check inputs</span>
-    <span class="kw">if</span> <span class="ident">wmax</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">wmin</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmin` must be strictly less than `wmax`.&quot;</span>.<span class="ident">into</span>()); }
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">wmin</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmin` is not integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); }
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">wmax</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmax` is not integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); }
+    <span class="kw">if</span> <span class="ident">wmax</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">wmin</span> { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmin` must be strictly less than `wmax`.&quot;</span>.<span class="ident">into</span>()); 
+    }
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">wmin</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmin` is not integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); 
+    }
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">wmax</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`wmax` is not integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); 
+    }
     <span class="kw">let</span> <span class="ident">t_min</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">wmin</span><span class="op">/</span><span class="ident">gamma</span>);
     <span class="kw">let</span> <span class="ident">t_max</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">wmax</span><span class="op">/</span><span class="ident">gamma</span>);
 
@@ -912,8 +964,10 @@
     <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">normalized_sample</span>(<span class="kw-2">&amp;</span><span class="ident">region_weights</span>,<span class="ident">arithmeticconfig</span>,<span class="ident">rng</span>,<span class="ident">optimize</span>)<span class="question-mark">?</span>;
 
     <span class="kw">match</span> <span class="ident">r</span> { 
-        <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">NegInfinity</span>)),  <span class="comment">// lower region</span>
-        <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">Infinity</span>)),     <span class="comment">// upper region</span>
+        <span class="comment">// lower region</span>
+        <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">NegInfinity</span>)),  
+        <span class="comment">// upper region</span>
+        <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">Infinity</span>)),     
         <span class="kw">_</span><span class="op">=</span><span class="op">&gt;</span> (), <span class="comment">// Must sample from the middle region </span>
     }
     <span class="comment">// Sample from the middle region</span>
@@ -946,8 +1000,8 @@
 <span class="doccomment">/// ## Arguments</span>
 <span class="doccomment">/// * `eta`: privacy parameter</span>
 <span class="doccomment">/// * `gamma_inv`: an integer-valued Float representing the inverse of `gamma`</span>
-<span class="doccomment">/// * `arithmeticconfig`: an ArithmeticConfig with sufficient precision to adjust</span>
-<span class="doccomment">///    `eta` if it can be adjusted. </span>
+<span class="doccomment">/// * `arithmeticconfig`: an ArithmeticConfig with sufficient precision to </span>
+<span class="doccomment">///       adjust `eta` if it can be adjusted. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Returns</span>
 <span class="doccomment">/// A new `Eta` adjusted such that `2^eta_prime = (2^eta)^gamma` or an error</span>
@@ -959,7 +1013,9 @@
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Eta</span><span class="op">&gt;</span><span class="comment">//,&amp;&#39;static str&gt; </span>
 {
     <span class="comment">// Check that gamma is valid for the given eta</span>
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">gamma_inv</span>.<span class="ident">is_integer</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`gamma_inv` must be an integer.&quot;</span>.<span class="ident">into</span>()); }
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">gamma_inv</span>.<span class="ident">is_integer</span>() { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`gamma_inv` must be an integer.&quot;</span>.<span class="ident">into</span>()); 
+    }
     <span class="kw">let</span> <span class="ident">gamma</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1.0</span><span class="op">/</span><span class="ident">gamma_inv</span>);
     <span class="comment">// Check if eta.z is divisible by gamma_inv.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">z_prime</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">z</span>; 
@@ -978,13 +1034,18 @@
         <span class="kw">let</span> <span class="ident">fx</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">eta</span>.<span class="ident">x</span>);
         <span class="kw">let</span> <span class="ident">fy</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">eta</span>.<span class="ident">y</span>);
         
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">fy</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) {<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unable to adjust for gamma (y).&quot;</span>.<span class="ident">into</span>());}
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">fy</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unable to adjust for gamma (y).&quot;</span>.<span class="ident">into</span>());
+        }
         <span class="kw">let</span> <span class="ident">rooty</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">fy</span><span class="kw-2">*</span><span class="kw-2">&amp;</span><span class="ident">gamma</span>);
         
         <span class="kw">let</span> <span class="ident">rootx</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">fx</span>.<span class="ident">pow</span>(<span class="kw-2">&amp;</span><span class="ident">gamma</span>));
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">rootx</span>.<span class="ident">is_integer</span>() {<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unable to adjust for gamma (x).&quot;</span>.<span class="ident">into</span>());}
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">rootx</span>.<span class="ident">is_integer</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unable to adjust for gamma (x).&quot;</span>.<span class="ident">into</span>());
+        }
         
-        <span class="ident">x_prime</span> <span class="op">=</span> <span class="ident">rootx</span>.<span class="ident">to_integer</span>().<span class="ident">unwrap</span>().<span class="ident">to_u32</span>().<span class="ident">unwrap</span>(); <span class="comment">// TODO: more elegant error handling</span>
+        <span class="comment">// TODO: more elegant error handling</span>
+        <span class="ident">x_prime</span> <span class="op">=</span> <span class="ident">rootx</span>.<span class="ident">to_integer</span>().<span class="ident">unwrap</span>().<span class="ident">to_u32</span>().<span class="ident">unwrap</span>(); 
         <span class="ident">y_prime</span> <span class="op">=</span> <span class="ident">rooty</span>.<span class="ident">to_integer</span>().<span class="ident">unwrap</span>().<span class="ident">to_u32</span>().<span class="ident">unwrap</span>();
     }
     <span class="kw">let</span> <span class="ident">eta_prime</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="ident">x_prime</span>,<span class="ident">y_prime</span>,<span class="ident">z_prime</span>)<span class="question-mark">?</span>;
@@ -992,8 +1053,8 @@
 
 }
 
-<span class="doccomment">/// Determines whether the discretized Laplace exceeds the given threshold conditioned</span>
-<span class="doccomment">/// on it exceeding the given conditional threshold.</span>
+<span class="doccomment">/// Determines whether the discretized Laplace exceeds the given </span>
+<span class="doccomment">/// threshold conditioned on it exceeding the given conditional threshold.</span>
 <span class="doccomment">/// ## Arguments</span>
 <span class="doccomment">///   * `eta`: the privacy parameter</span>
 <span class="doccomment">///   * `arithmeticconfig`: ArithmeticConfig with sufficient precision</span>
@@ -1004,17 +1065,20 @@
 <span class="doccomment">///   * `optimize`: whether to optimize sampling, exacerbates timing channels</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Returns</span>
-<span class="doccomment">/// Returns a `Float` with value `Special::Infinity` if greater than or equal to the threshold,</span>
-<span class="doccomment">/// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot</span>
-<span class="doccomment">/// be appropriately adjusted or sum computation fails. </span>
+<span class="doccomment">/// Returns a `Float` with value `Special::Infinity` if greater than or equal</span>
+<span class="doccomment">/// to the threshold, otherwise returns with value `Special::NegInfinity`. </span>
+<span class="doccomment">/// Returns an error if `eta` cannot be appropriately adjusted or sum </span>
+<span class="doccomment">/// computation fails. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Exact Arithmetic</span>
-<span class="doccomment">/// Does not explicitly enforce exact arithmetic, this is the caller&#39;s responsibility.</span>
+<span class="doccomment">/// Does not explicitly enforce exact arithmetic, this is the caller&#39;s </span>
+<span class="doccomment">/// responsibility.</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Privacy Budget</span>
 <span class="doccomment">/// Uses `eta` privacy budget. Note that if multiple calls of conditional threshold are made</span>
-<span class="doccomment">/// in a chain, i.e., cond_threshold(T_0,T_1); cond_threshold(T_1,T_2) then the privacy budget</span>
-<span class="doccomment">/// may be shared among these calls. This accounting must be used with caution. </span>
+<span class="doccomment">/// in a chain, i.e., cond_threshold(T_0,T_1); cond_threshold(T_1,T_2) then the </span>
+<span class="doccomment">/// privacy budget may be shared among these calls. This accounting must be </span>
+<span class="doccomment">/// used with caution. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing Channels</span>
 <span class="doccomment">/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
@@ -1022,18 +1086,23 @@
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, conditional_noisy_threshold};</span>
+<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,</span>
+<span class="doccomment">/// #            utilities::exactarithmetic::ArithmeticConfig, </span>
+<span class="doccomment">/// #            conditional_noisy_threshold};</span>
 <span class="doccomment">/// # use rug::Float;</span>
 <span class="doccomment">/// # use b2dp::errors::*;</span>
 <span class="doccomment">/// # fn main() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// let eta = Eta::new(1,1,2)?; </span>
 <span class="doccomment">/// let mut arithmeticconfig = ArithmeticConfig::basic()?;</span>
 <span class="doccomment">/// let rng = GeneratorOpenSSL {};</span>
 <span class="doccomment">/// let gamma_inv = arithmeticconfig.get_float(2);</span>
 <span class="doccomment">/// let cond_threshold = arithmeticconfig.get_float(0);</span>
 <span class="doccomment">/// let threshold = arithmeticconfig.get_float(1);</span>
 <span class="doccomment">/// arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">/// let s = conditional_noisy_threshold(eta, &amp; mut arithmeticconfig, &amp;gamma_inv, &amp;threshold, &amp;cond_threshold, rng, false)?;</span>
+<span class="doccomment">/// let s = conditional_noisy_threshold(eta, &amp; mut arithmeticconfig, </span>
+<span class="doccomment">///                                     &amp;gamma_inv, &amp;threshold, </span>
+<span class="doccomment">///                                     &amp;cond_threshold, rng, false)?;</span>
 <span class="doccomment">/// assert!(!s.is_finite()); // returns plus or minus infinity</span>
 <span class="doccomment">/// if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
 <span class="doccomment">/// else { /* Less than the threshold. */ ;}</span>
@@ -1065,14 +1134,20 @@
 
     <span class="comment">// Check that cond_threshold is less than threshold</span>
     <span class="kw">if</span> <span class="ident">cond_threshold</span> <span class="op">&gt;</span> <span class="ident">threshold</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;conditional threshold must be smaller than threshold.&quot;</span>.<span class="ident">into</span>());
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;conditional threshold must be smaller than threshold.&quot;</span>
+                .<span class="ident">into</span>());
     }
     <span class="kw">else</span> <span class="kw">if</span> <span class="ident">cond_threshold</span> <span class="op">=</span><span class="op">=</span> <span class="ident">threshold</span> {
         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">plus_infty</span>); <span class="comment">// The value already equals the threshold</span>
     }
     <span class="comment">// Check that thresholds are integer multiples of gamma</span>
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`threshold` must be integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); }
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`cond_threshold` must be integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); }
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`threshold` must be integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); 
+    }
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`cond_threshold` must be integer multiple of `gamma`.&quot;</span>
+        .<span class="ident">into</span>()); 
+    }
     <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">threshold</span><span class="kw-2">*</span><span class="ident">gamma_inv</span>); 
 
     <span class="comment">// Sum of weights above the threshold</span>
@@ -1108,13 +1183,16 @@
 <span class="doccomment">///   * `optimize`: whether to optimize sampling, exacerbates timing channels</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Returns</span>
-<span class="doccomment">/// Returns a `Float` with value `Special::Infinity` if draw from the discrete Laplace is </span>
-<span class="doccomment">/// greater than or equal to the threshold,</span>
-<span class="doccomment">/// otherwise returns with value `Special::NegInfinity`. Returns an error if `eta` cannot</span>
-<span class="doccomment">/// be appropriately adjusted or sum computation fails. </span>
+<span class="doccomment">/// Returns a `Float` with value `Special::Infinity` if draw from the discrete </span>
+<span class="doccomment">/// Laplace is greater than or equal to the threshold,</span>
+<span class="doccomment">/// otherwise returns with value `Special::NegInfinity`. </span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// Returns an error if `eta` cannot be appropriately adjusted or sum </span>
+<span class="doccomment">/// computation fails. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Exact Arithmetic</span>
-<span class="doccomment">/// Does not explicitly enforce exact arithmetic, this is the caller&#39;s responsibility.</span>
+<span class="doccomment">/// Does not explicitly enforce exact arithmetic, this is the caller&#39;s </span>
+<span class="doccomment">/// responsibility.</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Privacy Budget</span>
 <span class="doccomment">/// Uses `eta` privacy budget</span>
@@ -1125,17 +1203,20 @@
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};</span>
+<span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,</span>
+<span class="doccomment">/// # utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};</span>
 <span class="doccomment">/// # use rug::Float;</span>
 <span class="doccomment">/// # use b2dp::errors::*;</span>
 <span class="doccomment">/// # fn main() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">/// let eta = Eta::new(1,1,2)?; // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// // construct eta that can be adjusted for the desired value of gamma.</span>
+<span class="doccomment">/// let eta = Eta::new(1,1,2)?; </span>
 <span class="doccomment">/// let mut arithmeticconfig = ArithmeticConfig::basic()?;</span>
 <span class="doccomment">/// let rng = GeneratorOpenSSL {};</span>
 <span class="doccomment">/// let gamma_inv = arithmeticconfig.get_float(2);</span>
 <span class="doccomment">/// let threshold = arithmeticconfig.get_float(0);</span>
 <span class="doccomment">/// arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">/// let s = noisy_threshold(eta, &amp; mut arithmeticconfig, &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
+<span class="doccomment">/// let s = noisy_threshold(eta, &amp; mut arithmeticconfig, </span>
+<span class="doccomment">///                         &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
 <span class="doccomment">/// assert!(!s.is_finite()); // returns plus or minus infinity</span>
 <span class="doccomment">/// if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
 <span class="doccomment">/// else { /* Less than the threshold. */ ;}</span>
@@ -1144,8 +1225,12 @@
 <span class="doccomment">/// # Ok(())</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">noisy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, <span class="ident">arithmeticconfig</span>: <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>, <span class="ident">gamma_inv</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">threshold</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>,
-                        <span class="ident">rng</span>: <span class="ident">R</span>, <span class="ident">optimize</span>: <span class="ident">bool</span>) 
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">noisy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
+                                    <span class="ident">arithmeticconfig</span>: <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>, 
+                                    <span class="ident">gamma_inv</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, 
+                                    <span class="ident">threshold</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>,
+                                    <span class="ident">rng</span>: <span class="ident">R</span>, 
+                                    <span class="ident">optimize</span>: <span class="ident">bool</span>) 
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
     { 
         <span class="comment">// plus and minus infinity</span>
@@ -1158,11 +1243,16 @@
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">eta_prime</span>.<span class="ident">get_base</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">precision</span>)<span class="question-mark">?</span>;
         
         <span class="comment">// Check that gamma is valid (integer reciprocal)</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">gamma_inv</span>.<span class="ident">is_integer</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`gamma_inv` must be an integer.&quot;</span>.<span class="ident">into</span>()); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">gamma_inv</span>.<span class="ident">is_integer</span>() { 
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`gamma_inv` must be an integer.&quot;</span>.<span class="ident">into</span>()); 
+        }
         <span class="kw">let</span> <span class="ident">gamma</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1</span><span class="op">/</span><span class="ident">gamma_inv</span>);
 
         <span class="comment">// Check that threshold is integer multiple of gamma</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`threshold` must be integer multiple of `gamma`.&quot;</span>.<span class="ident">into</span>()); }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_multiple_of</span>(<span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">gamma</span>)  { 
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`threshold` must be integer multiple of `gamma`.&quot;</span>
+            .<span class="ident">into</span>()); 
+        }
         <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">threshold</span><span class="kw-2">*</span><span class="ident">gamma_inv</span>); 
 
         <span class="kw">let</span> <span class="ident">p_top</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>,
@@ -1187,100 +1277,97 @@
 
 
 <span class="doccomment">/// Returns the sum: </span>
-<span class="doccomment">/// 0.5*(1-base)^{-1}*\sum_{k=start}^{end}base^{|k|}</span>
+<span class="doccomment">/// (1-base)*\sum_{k=start}^{end}base^{|k|}</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Arguments:</span>
 <span class="doccomment">///   * `base`: a `Float` indicating the base for the sum</span>
 <span class="doccomment">///   * `arithmeticconfig`: an ArithmeticConfig  </span>
-<span class="doccomment">///   * `start`: an integer-valued or infinite `Float` indicating the starting point of the sum</span>
-<span class="doccomment">///   * `end`: an integer-valued or infinite `Float` indicating the ending point of the sum</span>
+<span class="doccomment">///   * `start`: an integer-valued or infinite `Float` indicating the starting </span>
+<span class="doccomment">///              point of the sum</span>
+<span class="doccomment">///   * `end`: an integer-valued or infinite `Float` indicating the ending </span>
+<span class="doccomment">///            point of the sum</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Returns</span>
-<span class="doccomment">/// Either the sum or an error if parameters are mis-specified. This method does not explicitly check</span>
-<span class="doccomment">/// for inexact arithmetic, it is the caller&#39;s responsibility to do so. </span>
+<span class="doccomment">/// Either the sum or an error if parameters are mis-specified. This method </span>
+<span class="doccomment">/// does not explicitly check for inexact arithmetic, it is the caller&#39;s </span>
+<span class="doccomment">/// responsibility to do so. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Exact Arithmetic</span>
-<span class="doccomment">/// This method does not enforce exact arithmetic, this is the caller&#39;s responsibility. </span>
+<span class="doccomment">/// This method does not enforce exact arithmetic, this is the caller&#39;s </span>
+<span class="doccomment">/// responsibility. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing channels</span>
-<span class="doccomment">/// The recursive calls to `get_sum` introduce a timing channel distinguishing whether</span>
-<span class="doccomment">/// `start` and `end` cross zero. </span>
+<span class="doccomment">/// The recursive calls to `get_sum` introduce a timing channel distinguishing</span>
+<span class="doccomment">///  whether `start` and `end` cross zero. </span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sum</span>(<span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">arithmeticconfig</span>: <span class="kw-2">&amp;</span><span class="ident">ArithmeticConfig</span>, <span class="ident">start</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">end</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>) 
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
 {
     <span class="comment">// Check ordering</span>
-    <span class="kw">if</span> <span class="ident">start</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">end</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`start` must be strictly less than `end`.&quot;</span>.<span class="ident">into</span>()); }
+    <span class="kw">if</span> <span class="ident">start</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">end</span> { 
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`start` must be strictly less than `end`.&quot;</span>.<span class="ident">into</span>()); 
+    }
     <span class="comment">// Check integrality</span>
-    <span class="kw">if</span> (<span class="op">!</span><span class="ident">start</span>.<span class="ident">is_integer</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">start</span>.<span class="ident">is_finite</span>()) <span class="op">|</span><span class="op">|</span> <span class="comment">// infinite values are not considered integers</span>
-        (<span class="op">!</span><span class="ident">end</span>.<span class="ident">is_integer</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">end</span>.<span class="ident">is_finite</span>()) { 
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`start` and `end` must be integer values or infinite.&quot;</span>.<span class="ident">into</span>());
+    <span class="kw">if</span> (<span class="op">!</span><span class="ident">start</span>.<span class="ident">is_integer</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">start</span>.<span class="ident">is_finite</span>()) <span class="op">|</span><span class="op">|</span> <span class="comment">// infinite values are not </span>
+        (<span class="op">!</span><span class="ident">end</span>.<span class="ident">is_integer</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">end</span>.<span class="ident">is_finite</span>()) {     <span class="comment">// considered integers</span>
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`start` and `end` must be integer values or infinite.&quot;</span>
+               .<span class="ident">into</span>());
     }
 
     <span class="comment">// Check base magnitude</span>
     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">base</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">1</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;`base` must be less than 1.&quot;</span>.<span class="ident">into</span>()); }
 
+    <span class="comment">// Sum components</span>
+    <span class="kw">let</span> <span class="ident">abs_end</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">end</span>).<span class="ident">abs</span>();
+    <span class="kw">let</span> <span class="ident">abs_start</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">start</span>).<span class="ident">abs</span>();
+    <span class="kw">let</span> <span class="ident">end_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="kw-2">&amp;</span><span class="ident">abs_end</span> <span class="op">+</span> <span class="number">1</span>);
+    <span class="kw">let</span> <span class="ident">start_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="kw-2">&amp;</span><span class="ident">abs_start</span> <span class="op">+</span> <span class="number">1</span>);
+    <span class="kw">let</span> <span class="ident">pow_end_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">end_plus_one</span>);
+    <span class="kw">let</span> <span class="ident">pow_start_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">start_plus_one</span>);
+    <span class="comment">// base^(|end|)</span>
+    <span class="kw">let</span> <span class="ident">pow_end</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">abs_end</span>); 
+    <span class="comment">// base^(|start|)</span>
+    <span class="kw">let</span> <span class="ident">pow_start</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">abs_start</span>); 
+    <span class="kw">let</span> <span class="ident">base_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1</span><span class="op">+</span><span class="ident">base</span>);
+    
     <span class="comment">// Check for negative infinity case</span>
     <span class="kw">if</span> <span class="ident">start</span>.<span class="ident">is_infinite</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">start</span>.<span class="ident">is_sign_negative</span>() {
 
         <span class="kw">if</span> <span class="ident">end</span>.<span class="ident">is_infinite</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">end</span>.<span class="ident">is_sign_positive</span>() {
             <span class="comment">// Full infinite sum </span>
-            <span class="comment">// = 0.5*(1+base)</span>
-            <span class="kw">let</span> <span class="ident">base_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1</span><span class="op">+</span><span class="ident">base</span>); 
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span> <span class="op">*</span> <span class="ident">base_plus_one</span>));
+            <span class="comment">// = (1+base)</span>
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">base_plus_one</span>);
         }
 
-        <span class="comment">// Half-open infinite sum</span>
-        <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">end</span>);
-        <span class="kw">let</span> <span class="ident">abs_end</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">abs</span>();
+        <span class="comment">// Half-open infinite sum [-infinity, end]</span>
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">end</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="comment">// Same sign</span>
-            <span class="comment">// = 0.5 - 0.5*(1-base^(|end|)) </span>
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">abs_end</span>); <span class="comment">// base^(|end|)</span>
-            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span> <span class="op">-</span> <span class="number">0.5</span><span class="kw-2">*</span>(<span class="number">1</span><span class="op">-</span><span class="ident">p</span>));
+            <span class="comment">// = base^(|end|)  </span>
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">pow_end</span>);
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>);
         }
         <span class="kw">else</span> {
-            <span class="comment">// Different sign</span>
-            <span class="comment">// = 0.5 + 0.5*base - 0.5*base^(|end| + 1)</span>
-            <span class="kw">let</span> <span class="ident">end_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">abs_end</span> <span class="op">+</span> <span class="number">1</span>);
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">end_plus_one</span>); <span class="comment">// base^(|end|+1)</span>
-            <span class="kw">let</span> <span class="ident">half_base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span><span class="kw-2">*</span><span class="ident">base</span>);
-            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span> <span class="op">+</span> <span class="ident">half_base</span> <span class="op">-</span> <span class="number">0.5</span><span class="kw-2">*</span><span class="ident">p</span>);
+            <span class="comment">// = 1  + base - base^(|end| + 1)</span>
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base_plus_one</span> <span class="op">-</span> <span class="ident">pow_end_plus_one</span>);
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>);
         }
 
     }
     <span class="comment">// Half-open positive infinite sum</span>
     <span class="kw">else</span> <span class="kw">if</span> <span class="ident">end</span>.<span class="ident">is_infinite</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">end</span>.<span class="ident">is_sign_positive</span>() {
-        <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">start</span>);
-        <span class="kw">let</span> <span class="ident">abs_start</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">abs</span>();
-    
-        <span class="comment">// Half-open infinite sum</span>
+        <span class="comment">// Half-open infinite sum [start, +infinity]</span>
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">start</span> <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="comment">// Same sign</span>
-            <span class="comment">// = 0.5 - 0.5*(1-base^(|start|))</span>
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">abs_start</span>); <span class="comment">// base^(|start|)</span>
-           
-            
-            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span> <span class="op">-</span> <span class="number">0.5</span><span class="kw-2">*</span>(<span class="number">1</span><span class="op">-</span><span class="ident">p</span>));
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">pow_start</span>);
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>);
         }
         <span class="kw">else</span> {
-            <span class="comment">// Different sign</span>
-            <span class="comment">// = 0.5 + 0.5*base - 0.5*base^(|start| + 1)</span>
-            <span class="kw">let</span> <span class="ident">start_plus_one</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">abs_start</span> <span class="op">+</span> <span class="number">1</span>);
-           
-            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base</span>).<span class="ident">pow</span>(<span class="ident">start_plus_one</span>); <span class="comment">// base^(|start|+1)</span>
-           
-            <span class="kw">let</span> <span class="ident">half_base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span><span class="kw-2">*</span><span class="ident">base</span>);
-            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span> <span class="op">+</span> <span class="ident">half_base</span> <span class="op">-</span> <span class="number">0.5</span><span class="kw-2">*</span><span class="ident">p</span>);
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">base_plus_one</span> <span class="op">-</span> <span class="ident">pow_start_plus_one</span>);
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>);
         }
     }
     
     
     <span class="comment">// Otherwise, finite sum, recurse </span>
-    <span class="comment">// = get_sum(-infinity,infinity) - get_sum(-infinity, start - 1) - get_sum(end + 1, infinity)</span>
+    <span class="comment">// = get_sum(-infinity,infinity) - get_sum(-infinity, start - 1) </span>
+    <span class="comment">//   - get_sum(end + 1, infinity)</span>
     <span class="kw">let</span> <span class="ident">plus_infty</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">Infinity</span>);
     <span class="kw">let</span> <span class="ident">neg_infty</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="ident">Special</span>::<span class="ident">NegInfinity</span>);
     
@@ -1504,90 +1591,89 @@
         <span class="comment">// Complete infinite sum</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.75</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.5</span>); <span class="comment">// 1 + Base</span>
 
         <span class="comment">// [0,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">0</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.0</span>); 
         
         <span class="comment">// [-infinity, 0]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">0</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.0</span>);
 
         <span class="comment">// [1,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.25</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
 
         <span class="comment">// [-1,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="op">-</span><span class="number">1</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.625</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.25</span>);
 
         <span class="comment">// [-infinity,-1]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="op">-</span><span class="number">1</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.25</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
 
         <span class="comment">// [-infinity,1]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.625</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.25</span>);
 
         <span class="comment">// [1,5]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">5</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.2421875</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.484375</span>);
 
         <span class="comment">// [-5,5]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.5</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="op">-</span><span class="number">5</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">5</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.734375</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.46875</span>);
 
 
         <span class="comment">// base = 0.1 </span>
         <span class="comment">// Complete infinite sum</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.55</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.1</span>);
 
         <span class="comment">// [0,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">0</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.0</span>);
         
         <span class="comment">// [-infinity, 0]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">0</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.5</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.0</span>);
 
         <span class="comment">// [1,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_f64</span>()<span class="op">-</span><span class="number">0.05</span> <span class="op">&lt;</span> <span class="number">0.001</span>); <span class="comment">// result not exact, test case only</span>
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.1</span>); <span class="comment">// result not exact, test case only</span>
 
         <span class="comment">// [-1,infinity]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="op">-</span><span class="number">1</span>), <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">Infinity</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.545</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.09</span>);
 
         <span class="comment">// [-infinity,-1]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="op">-</span><span class="number">1</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_f64</span>()<span class="op">-</span><span class="number">0.05</span> <span class="op">&lt;</span> <span class="number">0.001</span>); <span class="comment">// result not exact, test case only</span>
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.1</span>); <span class="comment">// result not exact, test case only</span>
 
         <span class="comment">// [-infinity,1]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="ident">Special</span>::<span class="ident">NegInfinity</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">0.545</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s</span>,<span class="number">1.09</span>);
 
         <span class="comment">// [1,5]</span>
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.1</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">get_sum</span>(<span class="kw-2">&amp;</span><span class="ident">base</span>, <span class="kw-2">&amp;</span><span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">1</span>),<span class="kw-2">&amp;</span><span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="number">32</span>, <span class="number">5</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_f64</span>()<span class="op">-</span> <span class="number">0.499995</span><span class="op">&lt;</span> <span class="number">0.001</span>);<span class="comment">// result not exact, test case only</span>
-
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">to_f64</span>()<span class="op">-</span> <span class="number">0.099999</span> <span class="op">&lt;</span> <span class="number">0.001</span>);<span class="comment">// result not exact, test case only</span>
 
     }
 
