@@ -3,7 +3,7 @@
 use rug::{Float, rand::ThreadRandGen};
 use crate::utilities::exactarithmetic::{ArithmeticConfig};
 use crate::utilities::params::Eta;
-use crate::utilities::discretesampling::{sample_within_bounds, noisy_threshold, adjust_eta, is_multiple_of};
+use crate::utilities::discretesampling::{sample_within_bounds, lazy_threshold, adjust_eta, is_multiple_of};
 use crate::errors::*;
 
 /// The sparse vector mechanism
@@ -79,11 +79,11 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
             rng,
             optimize);
 
-        // Compute maximum and minimum possible calls to noisy_threshold()
+        // Compute maximum and minimum possible calls to lazy_threshold()
         // which will result from `query_min - w` and 
         // `query_max + w`
         let mut thresh = arithmetic_config.get_float(query_min - w);
-        let mut _test = noisy_threshold(eta2,
+        let mut _test = lazy_threshold(eta2,
             & mut arithmetic_config,
             &g_inv,
             &thresh,
@@ -91,7 +91,7 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
             optimize);
 
         thresh = arithmetic_config.get_float(query_max + w);
-        _test = noisy_threshold(eta2,
+        _test = lazy_threshold(eta2,
             & mut arithmetic_config,
             &g_inv,
             &thresh,
@@ -159,7 +159,7 @@ pub fn sparse_vector<R: ThreadRandGen+Copy>(eta1: Eta, eta2: Eta,
         // Noisy threshold for `rho - query_values[i]` 
         let thresh = arithmetic_config.get_float(&rho_hat - &q);
         
-        let a = noisy_threshold(eta2,
+        let a = lazy_threshold(eta2,
                                 & mut arithmetic_config,
                                 &g_inv,
                                 &thresh,

@@ -846,9 +846,13 @@
 <span id="846">846</span>
 <span id="847">847</span>
 <span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements discrete sampling methods in base-2</span>
-<span class="doccomment">//! including [`noisy_threshold`](./fn.noisy_threshold.html) and </span>
+<span class="doccomment">//! including [`lazy_threshold`](./fn.lazy_threshold.html) and </span>
 <span class="doccomment">//! [`sample_within_bounds`](./fn.sample_within_bounds.html).</span>
 <span class="doccomment">//! Function names/signatures are not finalized and are </span>
 <span class="doccomment">//! likely to be changed.</span>
@@ -1081,14 +1085,16 @@
 <span class="doccomment">/// used with caution. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing Channels</span>
-<span class="doccomment">/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
-<span class="doccomment">/// which has known timing channels. </span>
+<span class="doccomment">///  * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
+<span class="doccomment">/// which has known timing channels if the total weight is not the same</span>
+<span class="doccomment">/// between calls to `normalized_sample`. (For most invocations of sparse vector, this should not be the case.)</span>
+<span class="doccomment">///  * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a known timing channel. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,</span>
 <span class="doccomment">/// #            utilities::exactarithmetic::ArithmeticConfig, </span>
-<span class="doccomment">/// #            conditional_noisy_threshold};</span>
+<span class="doccomment">/// #            conditional_lazy_threshold};</span>
 <span class="doccomment">/// # use rug::Float;</span>
 <span class="doccomment">/// # use b2dp::errors::*;</span>
 <span class="doccomment">/// # fn main() -&gt; Result&lt;()&gt; {</span>
@@ -1100,7 +1106,7 @@
 <span class="doccomment">/// let cond_threshold = arithmeticconfig.get_float(0);</span>
 <span class="doccomment">/// let threshold = arithmeticconfig.get_float(1);</span>
 <span class="doccomment">/// arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">/// let s = conditional_noisy_threshold(eta, &amp; mut arithmeticconfig, </span>
+<span class="doccomment">/// let s = conditional_lazy_threshold(eta, &amp; mut arithmeticconfig, </span>
 <span class="doccomment">///                                     &amp;gamma_inv, &amp;threshold, </span>
 <span class="doccomment">///                                     &amp;cond_threshold, rng, false)?;</span>
 <span class="doccomment">/// assert!(!s.is_finite()); // returns plus or minus infinity</span>
@@ -1111,7 +1117,7 @@
 <span class="doccomment">/// # Ok(())</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conditional_noisy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">conditional_lazy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
                                                      <span class="ident">arithmeticconfig</span>: <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>, 
                                                      <span class="ident">gamma_inv</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, 
                                                      <span class="ident">threshold</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>,
@@ -1198,13 +1204,15 @@
 <span class="doccomment">/// Uses `eta` privacy budget</span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing Channels</span>
-<span class="doccomment">/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
-<span class="doccomment">/// which has known timing channels. </span>
+<span class="doccomment">///  * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
+<span class="doccomment">/// which has known timing channels if the total weight is not the same</span>
+<span class="doccomment">/// between calls to `normalized_sample`. (For most invocations of sparse vector, this should not be the case.)</span>
+<span class="doccomment">///  * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a known timing channel. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// # use b2dp::{Eta,GeneratorOpenSSL,</span>
-<span class="doccomment">/// # utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};</span>
+<span class="doccomment">/// # utilities::exactarithmetic::ArithmeticConfig, lazy_threshold};</span>
 <span class="doccomment">/// # use rug::Float;</span>
 <span class="doccomment">/// # use b2dp::errors::*;</span>
 <span class="doccomment">/// # fn main() -&gt; Result&lt;()&gt; {</span>
@@ -1215,7 +1223,7 @@
 <span class="doccomment">/// let gamma_inv = arithmeticconfig.get_float(2);</span>
 <span class="doccomment">/// let threshold = arithmeticconfig.get_float(0);</span>
 <span class="doccomment">/// arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">/// let s = noisy_threshold(eta, &amp; mut arithmeticconfig, </span>
+<span class="doccomment">/// let s = lazy_threshold(eta, &amp; mut arithmeticconfig, </span>
 <span class="doccomment">///                         &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
 <span class="doccomment">/// assert!(!s.is_finite()); // returns plus or minus infinity</span>
 <span class="doccomment">/// if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
@@ -1225,7 +1233,7 @@
 <span class="doccomment">/// # Ok(())</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">noisy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lazy_threshold</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
                                     <span class="ident">arithmeticconfig</span>: <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>, 
                                     <span class="ident">gamma_inv</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, 
                                     <span class="ident">threshold</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>,
@@ -1297,7 +1305,7 @@
 <span class="doccomment">/// responsibility. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing channels</span>
-<span class="doccomment">/// The recursive calls to `get_sum` introduce a timing channel distinguishing</span>
+<span class="doccomment">/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a timing channel distinguishing</span>
 <span class="doccomment">///  whether `start` and `end` cross zero. </span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sum</span>(<span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">arithmeticconfig</span>: <span class="kw-2">&amp;</span><span class="ident">ArithmeticConfig</span>, <span class="ident">start</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">end</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>) 
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
@@ -1445,7 +1453,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_cond_noisy_threshold</span>(){
+    <span class="kw">fn</span> <span class="ident">test_cond_lazy_threshold</span>(){
 
         <span class="comment">// Equivalent threshold test</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>).<span class="ident">unwrap</span>();
@@ -1455,7 +1463,7 @@
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">cond_threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">s</span>.<span class="ident">is_finite</span>()); <span class="comment">// should get plus or minus infinity</span>
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">b</span>.<span class="ident">is_ok</span>());
@@ -1468,7 +1476,7 @@
         <span class="kw">let</span> <span class="ident">cond_threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.3</span>);
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">is_err</span>());
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">b</span>.<span class="ident">is_ok</span>());
@@ -1481,14 +1489,14 @@
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">cond_threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">conditional_lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="kw-2">&amp;</span><span class="ident">cond_threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">is_err</span>());
         <span class="kw">let</span> <span class="ident">_b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>(); 
     }
 
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_noisy_threshold</span>(){
+    <span class="kw">fn</span> <span class="ident">test_lazy_threshold</span>(){
 
         <span class="comment">// Simple zero threshold test</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">2</span>).<span class="ident">unwrap</span>();
@@ -1497,7 +1505,7 @@
         <span class="kw">let</span> <span class="ident">gamma_inv</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">2</span>);
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">s</span>.<span class="ident">is_finite</span>()); <span class="comment">// should get plus or minus infinity</span>
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">b</span>.<span class="ident">is_ok</span>());
@@ -1509,7 +1517,7 @@
         <span class="kw">let</span> <span class="ident">gamma_inv</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">2</span>);
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.3</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">is_err</span>());
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">b</span>.<span class="ident">is_ok</span>());
@@ -1521,7 +1529,7 @@
         <span class="kw">let</span> <span class="ident">gamma_inv</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">2</span>);
         <span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">get_float</span>(<span class="number">0.3</span>);
         <span class="kw">let</span> <span class="ident">_a</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">enter_exact_scope</span>();
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta</span>, <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmeticconfig</span>, <span class="kw-2">&amp;</span><span class="ident">gamma_inv</span>, <span class="kw-2">&amp;</span><span class="ident">threshold</span>, <span class="ident">rng</span>, <span class="bool-val">false</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">is_err</span>());
         <span class="kw">let</span> <span class="ident">_b</span> <span class="op">=</span> <span class="ident">arithmeticconfig</span>.<span class="ident">exit_exact_scope</span>(); 
     }

@@ -287,7 +287,7 @@
 <span class="kw">use</span> <span class="ident">rug</span>::{<span class="ident">Float</span>, <span class="ident">rand</span>::<span class="ident">ThreadRandGen</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">exactarithmetic</span>::{<span class="ident">ArithmeticConfig</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">params</span>::<span class="ident">Eta</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">discretesampling</span>::{<span class="ident">sample_within_bounds</span>, <span class="ident">noisy_threshold</span>, <span class="ident">adjust_eta</span>, <span class="ident">is_multiple_of</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utilities</span>::<span class="ident">discretesampling</span>::{<span class="ident">sample_within_bounds</span>, <span class="ident">lazy_threshold</span>, <span class="ident">adjust_eta</span>, <span class="ident">is_multiple_of</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">errors</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// The sparse vector mechanism</span>
@@ -363,11 +363,11 @@
             <span class="ident">rng</span>,
             <span class="ident">optimize</span>);
 
-        <span class="comment">// Compute maximum and minimum possible calls to noisy_threshold()</span>
+        <span class="comment">// Compute maximum and minimum possible calls to lazy_threshold()</span>
         <span class="comment">// which will result from `query_min - w` and </span>
         <span class="comment">// `query_max + w`</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">thresh</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="ident">query_min</span> <span class="op">-</span> <span class="ident">w</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_test</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta2</span>,
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_test</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta2</span>,
             <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>,
             <span class="kw-2">&amp;</span><span class="ident">g_inv</span>,
             <span class="kw-2">&amp;</span><span class="ident">thresh</span>,
@@ -375,7 +375,7 @@
             <span class="ident">optimize</span>);
 
         <span class="ident">thresh</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="ident">query_max</span> <span class="op">+</span> <span class="ident">w</span>);
-        <span class="ident">_test</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta2</span>,
+        <span class="ident">_test</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta2</span>,
             <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>,
             <span class="kw-2">&amp;</span><span class="ident">g_inv</span>,
             <span class="kw-2">&amp;</span><span class="ident">thresh</span>,
@@ -443,7 +443,7 @@
         <span class="comment">// Noisy threshold for `rho - query_values[i]` </span>
         <span class="kw">let</span> <span class="ident">thresh</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_float</span>(<span class="kw-2">&amp;</span><span class="ident">rho_hat</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="ident">q</span>);
         
-        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">noisy_threshold</span>(<span class="ident">eta2</span>,
+        <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">lazy_threshold</span>(<span class="ident">eta2</span>,
                                 <span class="op">&amp;</span> <span class="kw-2">mut</span> <span class="ident">arithmetic_config</span>,
                                 <span class="kw-2">&amp;</span><span class="ident">g_inv</span>,
                                 <span class="kw-2">&amp;</span><span class="ident">thresh</span>,

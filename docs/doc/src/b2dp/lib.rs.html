@@ -325,11 +325,11 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! </span>
-<span class="doccomment">//! **Noisy Threshold** [`noisy_threshold`](./utilities/discretesampling/fn.noisy_threshold.html) determines whether discrete Laplace noise</span>
+<span class="doccomment">//! **Noisy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise</span>
 <span class="doccomment">//! centered at `0` with granularity `gamma` exceeds the given `threshold`. </span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold, errors::*};</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, lazy_threshold, errors::*};</span>
 <span class="doccomment">//! # use rug::Float;</span>
 <span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
 <span class="doccomment">//! let eta = Eta::new(1,1,2)?; // can be adjusted for the desired value of gamma.</span>
@@ -338,7 +338,7 @@
 <span class="doccomment">//! let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);</span>
 <span class="doccomment">//! let threshold = Float::with_val(arithmeticconfig.precision, 0);</span>
 <span class="doccomment">//! arithmeticconfig.enter_exact_scope()?; </span>
-<span class="doccomment">//! let s = noisy_threshold(eta, &amp; mut arithmeticconfig, &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
+<span class="doccomment">//! let s = lazy_threshold(eta, &amp; mut arithmeticconfig, &amp;gamma_inv, &amp;threshold, rng, false)?;</span>
 <span class="doccomment">//! assert!(!s.is_finite()); // returns plus or minus infinity</span>
 <span class="doccomment">//! if s.is_sign_positive() { /* Greater than the threshold */ ;}</span>
 <span class="doccomment">//! else { /* Less than the threshold. */ ;}</span>
@@ -423,8 +423,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">bounds</span>::{<span class="ident">PartitionBound</span>,<span class="ident">PartitionBoundOptions</span>};
 
 <span class="comment">// Discrete Laplace</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">noisy_threshold</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">conditional_noisy_threshold</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">lazy_threshold</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">conditional_lazy_threshold</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">utilities</span>::<span class="ident">discretesampling</span>::<span class="ident">sample_within_bounds</span>;
 
 <span class="comment">// Sparse Vector</span>

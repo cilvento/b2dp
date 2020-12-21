@@ -1,5 +1,5 @@
 //! Implements discrete sampling methods in base-2
-//! including [`noisy_threshold`](./fn.noisy_threshold.html) and 
+//! including [`lazy_threshold`](./fn.lazy_threshold.html) and 
 //! [`sample_within_bounds`](./fn.sample_within_bounds.html).
 //! Function names/signatures are not finalized and are 
 //! likely to be changed.
@@ -232,14 +232,16 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// used with caution. 
 /// 
 /// ## Timing Channels
-/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
-/// which has known timing channels. 
+///  * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
+/// which has known timing channels if the total weight is not the same
+/// between calls to `normalized_sample`. (For most invocations of sparse vector, this should not be the case.)
+///  * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a known timing channel. 
 /// 
 /// ## Example Usage
 /// ```
 /// # use b2dp::{Eta,GeneratorOpenSSL,
 /// #            utilities::exactarithmetic::ArithmeticConfig, 
-/// #            conditional_noisy_threshold};
+/// #            conditional_lazy_threshold};
 /// # use rug::Float;
 /// # use b2dp::errors::*;
 /// # fn main() -> Result<()> {
@@ -251,7 +253,7 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// let cond_threshold = arithmeticconfig.get_float(0);
 /// let threshold = arithmeticconfig.get_float(1);
 /// arithmeticconfig.enter_exact_scope()?; 
-/// let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, 
+/// let s = conditional_lazy_threshold(eta, & mut arithmeticconfig, 
 ///                                     &gamma_inv, &threshold, 
 ///                                     &cond_threshold, rng, false)?;
 /// assert!(!s.is_finite()); // returns plus or minus infinity
@@ -262,7 +264,7 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 /// # Ok(())
 /// # }
 /// ```
-pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta, 
+pub fn conditional_lazy_threshold<R: ThreadRandGen>(eta: Eta, 
                                                      arithmeticconfig: & mut ArithmeticConfig, 
                                                      gamma_inv: &Float, 
                                                      threshold: &Float,
@@ -349,13 +351,15 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// Uses `eta` privacy budget
 /// 
 /// ## Timing Channels
-/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
-/// which has known timing channels. 
+///  * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
+/// which has known timing channels if the total weight is not the same
+/// between calls to `normalized_sample`. (For most invocations of sparse vector, this should not be the case.)
+///  * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a known timing channel. 
 /// 
 /// ## Example Usage
 /// ```
 /// # use b2dp::{Eta,GeneratorOpenSSL,
-/// # utilities::exactarithmetic::ArithmeticConfig, noisy_threshold};
+/// # utilities::exactarithmetic::ArithmeticConfig, lazy_threshold};
 /// # use rug::Float;
 /// # use b2dp::errors::*;
 /// # fn main() -> Result<()> {
@@ -366,7 +370,7 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// let gamma_inv = arithmeticconfig.get_float(2);
 /// let threshold = arithmeticconfig.get_float(0);
 /// arithmeticconfig.enter_exact_scope()?; 
-/// let s = noisy_threshold(eta, & mut arithmeticconfig, 
+/// let s = lazy_threshold(eta, & mut arithmeticconfig, 
 ///                         &gamma_inv, &threshold, rng, false)?;
 /// assert!(!s.is_finite()); // returns plus or minus infinity
 /// if s.is_sign_positive() { /* Greater than the threshold */ ;}
@@ -376,7 +380,7 @@ pub fn conditional_noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// # Ok(())
 /// # }
 /// ```
-pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta, 
+pub fn lazy_threshold<R: ThreadRandGen>(eta: Eta, 
                                     arithmeticconfig: & mut ArithmeticConfig, 
                                     gamma_inv: &Float, 
                                     threshold: &Float,
@@ -448,7 +452,7 @@ pub fn noisy_threshold<R: ThreadRandGen>(eta: Eta,
 /// responsibility. 
 /// 
 /// ## Timing channels
-/// The recursive calls to `get_sum` introduce a timing channel distinguishing
+/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a timing channel distinguishing
 ///  whether `start` and `end` cross zero. 
 pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: &Float, end: &Float) 
     -> Result<Float>
@@ -596,7 +600,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cond_noisy_threshold(){
+    fn test_cond_lazy_threshold(){
 
         // Equivalent threshold test
         let eta = Eta::new(1,1,2).unwrap();
@@ -606,7 +610,7 @@ mod tests {
         let threshold = arithmeticconfig.get_float(0);
         let cond_threshold = arithmeticconfig.get_float(0);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false).unwrap();
+        let s = conditional_lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false).unwrap();
         assert!(!s.is_finite()); // should get plus or minus infinity
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -619,7 +623,7 @@ mod tests {
         let cond_threshold = arithmeticconfig.get_float(0.3);
         let threshold = arithmeticconfig.get_float(1);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
+        let s = conditional_lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
         assert!(s.is_err());
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -632,14 +636,14 @@ mod tests {
         let threshold = arithmeticconfig.get_float(0);
         let cond_threshold = arithmeticconfig.get_float(1);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = conditional_noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
+        let s = conditional_lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, &cond_threshold, rng, false);
         assert!(s.is_err());
         let _b = arithmeticconfig.exit_exact_scope(); 
     }
 
 
     #[test]
-    fn test_noisy_threshold(){
+    fn test_lazy_threshold(){
 
         // Simple zero threshold test
         let eta = Eta::new(1,1,2).unwrap();
@@ -648,7 +652,7 @@ mod tests {
         let gamma_inv = arithmeticconfig.get_float(2);
         let threshold = arithmeticconfig.get_float(0);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false).unwrap();
+        let s = lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false).unwrap();
         assert!(!s.is_finite()); // should get plus or minus infinity
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -660,7 +664,7 @@ mod tests {
         let gamma_inv = arithmeticconfig.get_float(2);
         let threshold = arithmeticconfig.get_float(0.3);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
+        let s = lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
         assert!(s.is_err());
         let b = arithmeticconfig.exit_exact_scope();
         assert!(b.is_ok());
@@ -672,7 +676,7 @@ mod tests {
         let gamma_inv = arithmeticconfig.get_float(2);
         let threshold = arithmeticconfig.get_float(0.3);
         let _a = arithmeticconfig.enter_exact_scope();
-        let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
+        let s = lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false);
         assert!(s.is_err());
         let _b = arithmeticconfig.exit_exact_scope(); 
     }

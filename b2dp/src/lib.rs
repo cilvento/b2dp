@@ -108,11 +108,11 @@
 //! # }
 //! ```
 //! 
-//! **Noisy Threshold** [`noisy_threshold`](./utilities/discretesampling/fn.noisy_threshold.html) determines whether discrete Laplace noise
+//! **Noisy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise
 //! centered at `0` with granularity `gamma` exceeds the given `threshold`. 
 //! 
 //! ```
-//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, noisy_threshold, errors::*};
+//! # use b2dp::{Eta,GeneratorOpenSSL,utilities::exactarithmetic::ArithmeticConfig, lazy_threshold, errors::*};
 //! # use rug::Float;
 //! # fn main() -> Result<()> {
 //! let eta = Eta::new(1,1,2)?; // can be adjusted for the desired value of gamma.
@@ -121,7 +121,7 @@
 //! let gamma_inv = Float::with_val(arithmeticconfig.precision, 2);
 //! let threshold = Float::with_val(arithmeticconfig.precision, 0);
 //! arithmeticconfig.enter_exact_scope()?; 
-//! let s = noisy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false)?;
+//! let s = lazy_threshold(eta, & mut arithmeticconfig, &gamma_inv, &threshold, rng, false)?;
 //! assert!(!s.is_finite()); // returns plus or minus infinity
 //! if s.is_sign_positive() { /* Greater than the threshold */ ;}
 //! else { /* Less than the threshold. */ ;}
@@ -206,8 +206,8 @@ pub use mechanisms::integerpartition::IntegerPartitionOptions;
 pub use utilities::bounds::{PartitionBound,PartitionBoundOptions};
 
 // Discrete Laplace
-pub use utilities::discretesampling::noisy_threshold;
-pub use utilities::discretesampling::conditional_noisy_threshold;
+pub use utilities::discretesampling::lazy_threshold;
+pub use utilities::discretesampling::conditional_lazy_threshold;
 pub use utilities::discretesampling::sample_within_bounds;
 
 // Sparse Vector

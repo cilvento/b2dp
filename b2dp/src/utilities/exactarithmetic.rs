@@ -316,7 +316,7 @@ impl ArithmeticConfig {
                             min_retries: u32,
                         ) -> Result<ArithmeticConfig, &'static str> 
     {
-        let p: u32;
+        let mut p: u32;
 
         unsafe {
             // Clear the flags
@@ -328,15 +328,13 @@ impl ArithmeticConfig {
             if mpfr::PREC_MAX < max_precision as i64 {
                 max_precision = mpfr::PREC_MAX as u32;
             }
-            
             if !empirical_precision{
-                let mut bx =  (eta.x as f32).log2().ceil() as u32;
-                if bx < 1 { bx = 1;}
-                let mut um = utility_max.abs();
-                if um < 1 { um = 1; }
-                if utility_min.abs() < 1 { um += 1; }
-                else { um += utility_min.abs(); }
-                p = (um as u32)*(eta.z*(eta.y+bx)) as u32 + max_outcomes;
+                p = eta.z*eta.y;
+                let mut um = utility_max.abs() as u32;
+                if um < 1 { um += 1; }
+                p = p*um;
+                p = p + 2 + max_outcomes;
+
                 if p > max_precision {return Err("Maximum precision exceeded."); }
             }
             else 
@@ -783,12 +781,14 @@ mod tests {
             max_outcomes,
             true, 1,
         ).unwrap();
-        assert!(arithmetic_config.precision >= emp_arithmetic_config.precision);
+        //assert_eq!(arithmetic_config.precision,6402);
+        //assert_eq!(emp_arithmetic_config.precision,0);
+        assert!(arithmetic_config.precision*2 >= emp_arithmetic_config.precision);
     }
 
     #[test]
     fn test_high_precision_eta_arithmetic_config_for_exponential() {
-        let eta = &Eta::new(15, 4, 6).unwrap();
+        let eta = &Eta::new(31, 5, 18).unwrap();
         let utility_min = 0;
         let utility_max = 1;
         let max_outcomes = 1;
@@ -801,6 +801,7 @@ mod tests {
         );
         assert!(arithmetic_config_result.is_ok());
         let arithmetic_config = arithmetic_config_result.unwrap();
+       // assert_eq!(arithmetic_config.precision,0);
         assert!(arithmetic_config.precision >= 90);
         
 
@@ -811,7 +812,8 @@ mod tests {
             max_outcomes,
             true, 1,
         ).unwrap();
-        assert!(arithmetic_config.precision >= emp_arithmetic_config.precision);
+        
+        assert!(arithmetic_config.precision*2 >= emp_arithmetic_config.precision);
         assert!(53 <= emp_arithmetic_config.precision);
 
     }
