@@ -10,6 +10,7 @@ Author: Christina Ilvento
 * [Abstract](https://drive.google.com/file/d/1okHAkjNENiS2WfSKdkUo8B29yE8-Qfof/view?usp=sharing) - *Implementing differentially private integer partitions with Base-2 DP* an extension of [Blocki, Datta and Bonneau '16](http://www.jbonneau.com/doc/BDB16-NDSS-pw_list_differential_privacy.pdf).
 
 ### [Documentation](https://cilvento.github.io/b2dp/doc/b2dp/index.html)
+* [Example notebook](https://bit.ly/3nviEiD) for sparse-vector technique issues.
 
 ### Benchmarks
 [`Criterion`](https://github.com/bheisler/criterion.rs) benchmarks can be found in `b2dp/src/benchmarks/`. To run the benchmarks: 
