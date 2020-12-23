@@ -1097,13 +1097,13 @@
                         (<span class="ident">x</span>: <span class="ident">f64</span>,
                          <span class="ident">arithmetic_config</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ArithmeticConfig</span>,
                          <span class="kw-2">mut</span> <span class="ident">rng</span>: <span class="ident">R</span>) 
-  <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span> 
+  <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> 
 {
     <span class="comment">// if x is already integer, return it</span>
-    <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">x</span> { <span class="kw">return</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">i64</span>; }
+    <span class="kw">if</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">x</span> { <span class="kw">return</span> <span class="ident">x</span> <span class="kw">as</span> <span class="ident">u32</span>; }
     
     <span class="kw">let</span> <span class="ident">x_fract</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">fract</span>(); <span class="comment">// fractional part of x</span>
-    <span class="kw">let</span> <span class="ident">x_trunc</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="kw">as</span> <span class="ident">i64</span>; <span class="comment">// integer part of x</span>
+    <span class="kw">let</span> <span class="ident">x_trunc</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">trunc</span>() <span class="kw">as</span> <span class="ident">u32</span>; <span class="comment">// integer part of x</span>
     <span class="comment">// Draw a random value</span>
     <span class="kw">let</span> <span class="ident">rho</span> <span class="op">=</span> <span class="ident">arithmetic_config</span>.<span class="ident">get_rand_float</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rng</span>);
     <span class="kw">if</span> <span class="ident">rho</span> <span class="op">&gt;</span> <span class="ident">x_fract</span> {
@@ -1305,8 +1305,8 @@
     <span class="doccomment">/// by computing a set of worst-case sums. </span>
     <span class="doccomment">/// Does **not** preserve the state of the incoming `mpfr::flags`.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_empirical_precision</span>(<span class="ident">eta</span>: <span class="kw-2">&amp;</span><span class="ident">Eta</span>,
-                                <span class="ident">utility_min</span>: <span class="ident">i64</span>,
-                                <span class="ident">utility_max</span>: <span class="ident">i64</span>,
+                                <span class="ident">utility_min</span>: <span class="ident">u32</span>,
+                                <span class="ident">utility_max</span>: <span class="ident">u32</span>,
                                 <span class="ident">max_outcomes</span>: <span class="ident">u32</span>,
                                 <span class="ident">max_precision</span>: <span class="ident">u32</span>,) 
                                 <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>,<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> 
@@ -1387,8 +1387,8 @@
     <span class="doccomment">/// Returns an error if sufficient precision cannot be determined.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_exponential</span>(
                             <span class="ident">eta</span>: <span class="kw-2">&amp;</span><span class="ident">Eta</span>,
-                            <span class="ident">utility_min</span>: <span class="ident">i64</span>,
-                            <span class="ident">utility_max</span>: <span class="ident">i64</span>,
+                            <span class="ident">utility_min</span>: <span class="ident">u32</span>,
+                            <span class="ident">utility_max</span>: <span class="ident">u32</span>,
                             <span class="ident">max_outcomes</span>: <span class="ident">u32</span>,
                             <span class="ident">empirical_precision</span>: <span class="ident">bool</span>,
                             <span class="ident">min_retries</span>: <span class="ident">u32</span>,
@@ -1408,7 +1408,7 @@
             }
             <span class="kw">if</span> <span class="op">!</span><span class="ident">empirical_precision</span>{
                 <span class="ident">p</span> <span class="op">=</span> <span class="ident">eta</span>.<span class="ident">z</span><span class="kw-2">*</span><span class="ident">eta</span>.<span class="ident">y</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">um</span> <span class="op">=</span> <span class="ident">utility_max</span>.<span class="ident">abs</span>() <span class="kw">as</span> <span class="ident">u32</span>;
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">um</span> <span class="op">=</span> <span class="ident">utility_max</span>; <span class="comment">//.abs() as u32;</span>
                 <span class="kw">if</span> <span class="ident">um</span> <span class="op">&lt;</span> <span class="number">1</span> { <span class="ident">um</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>; }
                 <span class="ident">p</span> <span class="op">=</span> <span class="ident">p</span><span class="kw-2">*</span><span class="ident">um</span>;
                 <span class="ident">p</span> <span class="op">=</span> <span class="ident">p</span> <span class="op">+</span> <span class="number">2</span> <span class="op">+</span> <span class="ident">max_outcomes</span>;
@@ -1838,7 +1838,7 @@
     <span class="kw">fn</span> <span class="ident">test_high_precision_arithmetic_config_for_exponential</span>() {
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">2i64</span>.<span class="ident">pow</span>(<span class="number">10</span>);
+        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">2u32</span>.<span class="ident">pow</span>(<span class="number">10</span>);
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">2u32</span>.<span class="ident">pow</span>(<span class="number">8</span>);
         <span class="kw">let</span> <span class="ident">arithmetic_config_result</span> <span class="op">=</span> <span class="ident">ArithmeticConfig</span>::<span class="ident">for_exponential</span>(
             <span class="ident">eta</span>,
@@ -1900,7 +1900,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_arithmetic_config_for_exponential</span>() {
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">100</span>;
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>; 
         <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">100</span>;
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">arithmetic_config_result</span> <span class="op">=</span> <span class="ident">ArithmeticConfig</span>::<span class="ident">for_exponential</span>(
@@ -1921,8 +1921,8 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_exact_scope</span>() {
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">100</span>;
-        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">100</span>; 
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">arithmetic_config_result</span> <span class="op">=</span> <span class="ident">ArithmeticConfig</span>::<span class="ident">for_exponential</span>(
             <span class="ident">eta</span>,
@@ -1947,7 +1947,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">weight_sum</span> <span class="op">=</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">working_precision</span>, <span class="number">0</span>);
         <span class="kw">for</span> <span class="ident">_i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">max_outcomes</span> {
             <span class="kw">let</span> <span class="ident">new_weight_sum</span> <span class="op">=</span>
-                <span class="ident">weight_sum</span> <span class="op">+</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">working_precision</span>, <span class="ident">base</span>.<span class="ident">pow</span>(<span class="ident">utility_max</span>));
+                <span class="ident">weight_sum</span> <span class="op">+</span> <span class="ident">Float</span>::<span class="ident">with_val</span>(<span class="ident">working_precision</span>, <span class="ident">base</span>.<span class="ident">pow</span>(<span class="ident">utility_min</span>));
             <span class="ident">weight_sum</span> <span class="op">=</span> <span class="ident">new_weight_sum</span>;
         }
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">10</span>, <span class="ident">weight_sum</span>);
@@ -1979,7 +1979,7 @@
     <span class="kw">fn</span> <span class="ident">test_optimized_normalized_sample</span>() {
         <span class="comment">// Generate an arithmetic config</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>;
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">GeneratorOpenSSL</span> {};
@@ -2024,7 +2024,7 @@
     <span class="kw">fn</span> <span class="ident">test_normalized_sample</span>() {
         <span class="comment">// Generate an arithmetic config</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>;
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>; 
         <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">GeneratorOpenSSL</span> {};
@@ -2084,8 +2084,8 @@
     <span class="kw">fn</span> <span class="ident">test_randomized_round</span>() {
         <span class="comment">// Generate an arithmetic config</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">100</span>;
-        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">0</span>; 
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>; 
+        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">100</span>; 
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">GeneratorOpenSSL</span> {};
         <span class="kw">let</span> <span class="ident">arithmetic_config_result</span> <span class="op">=</span> <span class="ident">ArithmeticConfig</span>::<span class="ident">for_exponential</span>(
@@ -2112,7 +2112,7 @@
     <span class="kw">fn</span> <span class="ident">test_min_retries</span>(){
         <span class="comment">// Generate an arithmetic config</span>
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>;
+        <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>; 
         <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">GeneratorOpenSSL</span> {};

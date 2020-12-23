@@ -19,13 +19,13 @@ pub fn randomized_round<R: ThreadRandGen>
                         (x: f64,
                          arithmetic_config: &mut ArithmeticConfig,
                          mut rng: R) 
-  -> i64 
+  -> u32 
 {
     // if x is already integer, return it
-    if x.trunc() == x { return x as i64; }
+    if x.trunc() == x { return x as u32; }
     
     let x_fract = x.fract(); // fractional part of x
-    let x_trunc = x.trunc() as i64; // integer part of x
+    let x_trunc = x.trunc() as u32; // integer part of x
     // Draw a random value
     let rho = arithmetic_config.get_rand_float(&mut rng);
     if rho > x_fract {
@@ -227,8 +227,8 @@ impl ArithmeticConfig {
     /// by computing a set of worst-case sums. 
     /// Does **not** preserve the state of the incoming `mpfr::flags`.
     unsafe fn get_empirical_precision(eta: &Eta,
-                                utility_min: i64,
-                                utility_max: i64,
+                                utility_min: u32,
+                                utility_max: u32,
                                 max_outcomes: u32,
                                 max_precision: u32,) 
                                 -> Result<u32,&'static str> 
@@ -309,8 +309,8 @@ impl ArithmeticConfig {
     /// Returns an error if sufficient precision cannot be determined.
     pub fn for_exponential(
                             eta: &Eta,
-                            utility_min: i64,
-                            utility_max: i64,
+                            utility_min: u32,
+                            utility_max: u32,
                             max_outcomes: u32,
                             empirical_precision: bool,
                             min_retries: u32,
@@ -330,7 +330,7 @@ impl ArithmeticConfig {
             }
             if !empirical_precision{
                 p = eta.z*eta.y;
-                let mut um = utility_max.abs() as u32;
+                let mut um = utility_max; //.abs() as u32;
                 if um < 1 { um += 1; }
                 p = p*um;
                 p = p + 2 + max_outcomes;
@@ -760,7 +760,7 @@ mod tests {
     fn test_high_precision_arithmetic_config_for_exponential() {
         let eta = &Eta::new(1, 2, 3).unwrap();
         let utility_min = 0;
-        let utility_max = 2i64.pow(10);
+        let utility_max = 2u32.pow(10);
         let max_outcomes = 2u32.pow(8);
         let arithmetic_config_result = ArithmeticConfig::for_exponential(
             eta,
@@ -822,7 +822,7 @@ mod tests {
     #[test]
     fn test_arithmetic_config_for_exponential() {
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -100;
+        let utility_min = 0; 
         let utility_max = 100;
         let max_outcomes = 10;
         let arithmetic_config_result = ArithmeticConfig::for_exponential(
@@ -843,8 +843,8 @@ mod tests {
     #[test]
     fn test_exact_scope() {
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -100;
-        let utility_max = 0;
+        let utility_min = 0;
+        let utility_max = 100; 
         let max_outcomes = 10;
         let arithmetic_config_result = ArithmeticConfig::for_exponential(
             eta,
@@ -869,7 +869,7 @@ mod tests {
         let mut weight_sum = Float::with_val(working_precision, 0);
         for _i in 0..max_outcomes {
             let new_weight_sum =
-                weight_sum + Float::with_val(working_precision, base.pow(utility_max));
+                weight_sum + Float::with_val(working_precision, base.pow(utility_min));
             weight_sum = new_weight_sum;
         }
         assert_eq!(10, weight_sum);
@@ -901,7 +901,7 @@ mod tests {
     fn test_optimized_normalized_sample() {
         // Generate an arithmetic config
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -1;
+        let utility_min = 0;
         let utility_max = 10;
         let max_outcomes = 10;
         let rng = GeneratorOpenSSL {};
@@ -946,7 +946,7 @@ mod tests {
     fn test_normalized_sample() {
         // Generate an arithmetic config
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -1;
+        let utility_min = 0; 
         let utility_max = 10;
         let max_outcomes = 10;
         let rng = GeneratorOpenSSL {};
@@ -1006,8 +1006,8 @@ mod tests {
     fn test_randomized_round() {
         // Generate an arithmetic config
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -100;
-        let utility_max = 0; 
+        let utility_min = 0; 
+        let utility_max = 100; 
         let max_outcomes = 10;
         let rng = GeneratorOpenSSL {};
         let arithmetic_config_result = ArithmeticConfig::for_exponential(
@@ -1034,7 +1034,7 @@ mod tests {
     fn test_min_retries(){
         // Generate an arithmetic config
         let eta = &Eta::new(1, 1, 1).unwrap();
-        let utility_min = -1;
+        let utility_min = 0; 
         let utility_max = 10;
         let max_outcomes = 10;
         let rng = GeneratorOpenSSL {};

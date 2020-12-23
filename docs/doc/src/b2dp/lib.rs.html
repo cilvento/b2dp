@@ -214,6 +214,10 @@
 <span id="214">214</span>
 <span id="215">215</span>
 <span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # Base-2 Differential Privacy Crate</span>
 <span class="doccomment">//! Implements the exponential mechanism and other utilities for base-2 </span>
@@ -259,6 +263,10 @@
 <span class="doccomment">//! **Running the exponential mechanism**</span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! Run the exponential mechanism with utility function `utility_fn`.</span>
+<span class="doccomment">//! The utility function is negated by convention, and utilities must</span>
+<span class="doccomment">//! be non-negative values. For example, using utility range `0` to `10`,</span>
+<span class="doccomment">//! utility `0` has the highest weight and probability of selection and </span>
+<span class="doccomment">//! utility `10` the lowest. </span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};</span>
 <span class="doccomment">//! </span>

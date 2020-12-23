@@ -50,10 +50,10 @@ impl Default for ExponentialOptions {
 struct ExponentialConfig {
     /// The privacy parameter
     pub eta: Eta,
-    /// The minimum utility (maximum weight) (signed)
-    pub utility_min: i64,
-    /// The maximum utility (minimum weight) (signed)
-    pub utility_max: i64,
+    /// The minimum utility (maximum weight)
+    pub utility_min: u32,
+    /// The maximum utility (minimum weight)
+    pub utility_max: u32,
     /// The maximum size of the outcome space
     pub max_outcomes: u32,
     /// The arithmetic configuration
@@ -77,8 +77,8 @@ impl ExponentialConfig {
     /// Returns an error if any of the parameters are mis-specified, or if sufficient precision cannot
     /// be determined.
     pub fn new(eta: Eta, 
-               utility_min: i64, 
-               utility_max: i64, 
+               utility_min: u32, 
+               utility_max: u32, 
                max_outcomes: u32, 
                empirical_precision: bool, 
                min_retries: u32)
@@ -179,8 +179,8 @@ pub fn exponential_mechanism<T, R: ThreadRandGen + Copy, F: Fn(&T)->f64>
         ( eta: Eta, 
           outcomes: &Vec<T>, 
           utility: F,
-          utility_min: i64, 
-          utility_max: i64, 
+          utility_min: u32, 
+          utility_max: u32, 
           max_outcomes: u32,
           rng: R, 
           options: ExponentialOptions) 
@@ -257,7 +257,7 @@ mod tests {
         let outcomes: Vec<u32> = (0..num_outcomes).collect();
         let eta = Eta::new(1,1,1).unwrap();
         let utility_min = 0;
-        let utility_max = (num_outcomes as i64)*2;
+        let utility_max = num_outcomes*2;
         let max_outcomes = 10;
         let rng = GeneratorOpenSSL {};
 

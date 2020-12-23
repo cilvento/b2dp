@@ -101,6 +101,9 @@
 <span id="101">101</span>
 <span id="102">102</span>
 <span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements an approximation of the Laplace mechanims via the base-2 exponential mechanism. </span>
 <span class="doccomment">//! Note: this does incur the factor of 2 penalty on privacy loss. Consider `sample_within_bounds`</span>
@@ -143,6 +146,9 @@
 <span class="doccomment">/// let rng = GeneratorOpenSSL {};</span>
 <span class="doccomment">/// let sample = clamped_laplace_mechanism(eta, lower_bound, upper_bound, target, gamma, rng, Default::default()).unwrap();</span>
 <span class="doccomment">/// ```</span>
+<span class="attribute">#[<span class="ident">deprecated</span>(
+    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;Please use `sample_within_bounds` as an alternative to this method.&quot;</span>
+)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clamped_laplace_mechanism</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">ThreadRandGen</span> <span class="op">+</span> <span class="ident">Copy</span><span class="op">&gt;</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
                                                           <span class="ident">lower_bound</span>: <span class="ident">f64</span>, 
                                                           <span class="ident">upper_bound</span>: <span class="ident">f64</span>, 
@@ -181,7 +187,7 @@
     <span class="kw">let</span> <span class="ident">sample</span> <span class="op">=</span> <span class="ident">exponential_mechanism</span>(<span class="ident">eta</span>, <span class="kw-2">&amp;</span><span class="ident">outcomes</span>,
                                         <span class="ident">laplace_utility</span>, 
                                         <span class="number">0</span>,
-                                        <span class="ident">utility_max</span> <span class="kw">as</span> <span class="ident">i64</span>, 
+                                        <span class="ident">utility_max</span> <span class="kw">as</span> <span class="ident">u32</span>, 
                                         <span class="ident">max_outcomes</span> <span class="kw">as</span> <span class="ident">u32</span>,
                                         <span class="ident">rng</span>, 
                                         <span class="ident">options</span>).<span class="ident">unwrap</span>();

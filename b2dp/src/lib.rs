@@ -42,6 +42,10 @@
 //! **Running the exponential mechanism**
 //! 
 //! Run the exponential mechanism with utility function `utility_fn`.
+//! The utility function is negated by convention, and utilities must
+//! be non-negative values. For example, using utility range `0` to `10`,
+//! utility `0` has the highest weight and probability of selection and 
+//! utility `10` the lowest. 
 //! ```
 //! use b2dp::{exponential_mechanism, Eta, GeneratorOpenSSL, errors::*};
 //! 

@@ -39,6 +39,9 @@ use crate::errors::*;
 /// let rng = GeneratorOpenSSL {};
 /// let sample = clamped_laplace_mechanism(eta, lower_bound, upper_bound, target, gamma, rng, Default::default()).unwrap();
 /// ```
+#[deprecated(
+    note = "Please use `sample_within_bounds` as an alternative to this method."
+)]
 pub fn clamped_laplace_mechanism<R: ThreadRandGen + Copy>(eta: Eta, 
                                                           lower_bound: f64, 
                                                           upper_bound: f64, 
@@ -77,7 +80,7 @@ pub fn clamped_laplace_mechanism<R: ThreadRandGen + Copy>(eta: Eta,
     let sample = exponential_mechanism(eta, &outcomes,
                                         laplace_utility, 
                                         0,
-                                        utility_max as i64, 
+                                        utility_max as u32, 
                                         max_outcomes as u32,
                                         rng, 
                                         options).unwrap();

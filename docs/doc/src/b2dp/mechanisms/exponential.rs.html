@@ -335,10 +335,10 @@
 <span class="kw">struct</span> <span class="ident">ExponentialConfig</span> {
     <span class="doccomment">/// The privacy parameter</span>
     <span class="kw">pub</span> <span class="ident">eta</span>: <span class="ident">Eta</span>,
-    <span class="doccomment">/// The minimum utility (maximum weight) (signed)</span>
-    <span class="kw">pub</span> <span class="ident">utility_min</span>: <span class="ident">i64</span>,
-    <span class="doccomment">/// The maximum utility (minimum weight) (signed)</span>
-    <span class="kw">pub</span> <span class="ident">utility_max</span>: <span class="ident">i64</span>,
+    <span class="doccomment">/// The minimum utility (maximum weight)</span>
+    <span class="kw">pub</span> <span class="ident">utility_min</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// The maximum utility (minimum weight)</span>
+    <span class="kw">pub</span> <span class="ident">utility_max</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// The maximum size of the outcome space</span>
     <span class="kw">pub</span> <span class="ident">max_outcomes</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// The arithmetic configuration</span>
@@ -362,8 +362,8 @@
     <span class="doccomment">/// Returns an error if any of the parameters are mis-specified, or if sufficient precision cannot</span>
     <span class="doccomment">/// be determined.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">eta</span>: <span class="ident">Eta</span>, 
-               <span class="ident">utility_min</span>: <span class="ident">i64</span>, 
-               <span class="ident">utility_max</span>: <span class="ident">i64</span>, 
+               <span class="ident">utility_min</span>: <span class="ident">u32</span>, 
+               <span class="ident">utility_max</span>: <span class="ident">u32</span>, 
                <span class="ident">max_outcomes</span>: <span class="ident">u32</span>, 
                <span class="ident">empirical_precision</span>: <span class="ident">bool</span>, 
                <span class="ident">min_retries</span>: <span class="ident">u32</span>)
@@ -464,8 +464,8 @@
         ( <span class="ident">eta</span>: <span class="ident">Eta</span>, 
           <span class="ident">outcomes</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, 
           <span class="ident">utility</span>: <span class="ident">F</span>,
-          <span class="ident">utility_min</span>: <span class="ident">i64</span>, 
-          <span class="ident">utility_max</span>: <span class="ident">i64</span>, 
+          <span class="ident">utility_min</span>: <span class="ident">u32</span>, 
+          <span class="ident">utility_max</span>: <span class="ident">u32</span>, 
           <span class="ident">max_outcomes</span>: <span class="ident">u32</span>,
           <span class="ident">rng</span>: <span class="ident">R</span>, 
           <span class="ident">options</span>: <span class="ident">ExponentialOptions</span>) 
@@ -542,7 +542,7 @@
         <span class="kw">let</span> <span class="ident">outcomes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">num_outcomes</span>).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">eta</span> <span class="op">=</span> <span class="ident">Eta</span>::<span class="ident">new</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">utility_min</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> (<span class="ident">num_outcomes</span> <span class="kw">as</span> <span class="ident">i64</span>)<span class="kw-2">*</span><span class="number">2</span>;
+        <span class="kw">let</span> <span class="ident">utility_max</span> <span class="op">=</span> <span class="ident">num_outcomes</span><span class="kw-2">*</span><span class="number">2</span>;
         <span class="kw">let</span> <span class="ident">max_outcomes</span> <span class="op">=</span> <span class="number">10</span>;
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">GeneratorOpenSSL</span> {};
 
