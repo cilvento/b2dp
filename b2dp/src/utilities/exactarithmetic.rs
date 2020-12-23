@@ -157,6 +157,7 @@ pub fn normalized_sample<R: ThreadRandGen>(
     if t >= total_weight {return Err("Failed to produce t");}
     let mut cumulative_weight = arithmetic_config.get_float(0); 
     let mut index: Option<usize> = None;
+    let mut prec_error: bool = false;
 
     // Iterate through the weights until the cumulative weight is greater than or equal to `t`
     for i in 0..weights.len() {
@@ -173,7 +174,11 @@ pub fn normalized_sample<R: ThreadRandGen>(
                     let mut cumulative_next = arithmetic_config.get_float(&cumulative_weight);
                     cumulative_next = cumulative_next + next_weight;
                     if cumulative_next < next_highest {
-                        return Err("Sampling precision insufficient");
+                        prec_error = true; 
+                        if optimize { 
+                            // Only error out immediately if optimized sampling
+                            return Err("Sampling precision insufficient"); 
+                        }
                     }
                 }
                 index = Some(i); 
@@ -185,6 +190,7 @@ pub fn normalized_sample<R: ThreadRandGen>(
 
     }
 
+    if prec_error == true { return Err("Sampling precision insufficient"); }
     if index.is_some() { return Ok(index.unwrap()); }
 
     // Return an error if we are unable to sample
