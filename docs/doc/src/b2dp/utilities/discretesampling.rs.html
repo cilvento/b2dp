@@ -850,6 +850,17 @@
 <span id="850">850</span>
 <span id="851">851</span>
 <span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Implements discrete sampling methods in base-2</span>
 <span class="doccomment">//! including [`lazy_threshold`](./fn.lazy_threshold.html) and </span>
@@ -899,8 +910,15 @@
 <span class="doccomment">/// Does not enforce exact arithmetic, this is the caller&#39;s responsibility. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing Channels</span>
-<span class="doccomment">/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
+<span class="doccomment">/// * Method terminates early if the sample is outside of the bounds. This</span>
+<span class="doccomment">///   may leak information if the magnitude of the noise should remain </span>
+<span class="doccomment">///   secret. </span>
+<span class="doccomment">///   TODO: Add an option to execute full sampling logic even if it is </span>
+<span class="doccomment">///   not needed to mitigate this timing channel.</span>
+<span class="doccomment">/// * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) </span>
 <span class="doccomment">/// which has known timing channels. </span>
+<span class="doccomment">/// * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a </span>
+<span class="doccomment">///    known timing channel. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Example Usage </span>
 <span class="doccomment">/// ```</span>
@@ -1305,8 +1323,12 @@
 <span class="doccomment">/// responsibility. </span>
 <span class="doccomment">/// </span>
 <span class="doccomment">/// ## Timing channels</span>
-<span class="doccomment">/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a timing channel distinguishing</span>
-<span class="doccomment">///  whether `start` and `end` cross zero. </span>
+<span class="doccomment">/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a </span>
+<span class="doccomment">/// timing channel distinguishing whether the sum has an infinite start or</span>
+<span class="doccomment">/// end point versus finite start and end points. In most settings, adjacent</span>
+<span class="doccomment">/// databases should not result in finite vs infinite endpoint differences. </span>
+<span class="doccomment">/// Slight timing variation due to logic between different types of infinite</span>
+<span class="doccomment">/// endpoints may be noticeable (please see benchmarks.) </span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_sum</span>(<span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">arithmeticconfig</span>: <span class="kw-2">&amp;</span><span class="ident">ArithmeticConfig</span>, <span class="ident">start</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>, <span class="ident">end</span>: <span class="kw-2">&amp;</span><span class="ident">Float</span>) 
     <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>
 {

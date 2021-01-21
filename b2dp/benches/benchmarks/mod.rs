@@ -8,3 +8,4 @@ pub mod laplace_precision_benchmark;
 pub mod retry_benchmark;
 pub mod timingchannel_benchmark;
 pub mod integerpartition;
+pub mod getsum_benchmark;

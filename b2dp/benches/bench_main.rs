@@ -12,4 +12,5 @@ criterion_main! {
     benchmarks::outcomespace_size_benchmark::benches,
     benchmarks::retry_benchmark::benches,
     benchmarks::timingchannel_benchmark::benches,
+    benchmarks::getsum_benchmark::benches,
 }

@@ -46,8 +46,15 @@ pub fn is_multiple_of(a: &Float, b: &Float) -> bool {
 /// Does not enforce exact arithmetic, this is the caller's responsibility. 
 /// 
 /// ## Timing Channels
-/// Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
+/// * Method terminates early if the sample is outside of the bounds. This
+///   may leak information if the magnitude of the noise should remain 
+///   secret. 
+///   TODO: Add an option to execute full sampling logic even if it is 
+///   not needed to mitigate this timing channel.
+/// * Uses [`normalized_sample`](../exactarithmetic/fn.normalized_sample.html#known-timing-channels) 
 /// which has known timing channels. 
+/// * Uses [`get_sum`](../discretesampling/fn.get_sum.html), which has a 
+///    known timing channel. 
 /// 
 /// ## Example Usage 
 /// ```
@@ -452,8 +459,12 @@ pub fn lazy_threshold<R: ThreadRandGen>(eta: Eta,
 /// responsibility. 
 /// 
 /// ## Timing channels
-/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a timing channel distinguishing
-///  whether `start` and `end` cross zero. 
+/// **Known Timing Channel:** The recursive calls to `get_sum` introduce a 
+/// timing channel distinguishing whether the sum has an infinite start or
+/// end point versus finite start and end points. In most settings, adjacent
+/// databases should not result in finite vs infinite endpoint differences. 
+/// Slight timing variation due to logic between different types of infinite
+/// endpoints may be noticeable (please see benchmarks.) 
 pub fn get_sum(base: &Float, arithmeticconfig: &ArithmeticConfig, start: &Float, end: &Float) 
     -> Result<Float>
 {
