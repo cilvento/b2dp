@@ -24,8 +24,8 @@
 //! * The integer partition exponential mechanism is based on extensions of
 //!   the mechanism proposed by Blocki, Datta and Bonneau in this [paper](http://www.jbonneau.com/doc/BDB16-NDSS-pw_list_differential_privacy.pdf).
 //!   Extensions include a pure-DP version of the mechanism and bias computation, 
-//!   and are described in this [working paper](http://bit.ly/39XyNrp).
-//! * The sparse vector mechanism implementation is based on a [working paper](http://bit.ly/3i4EJ4L) that describes
+//!   and are described in this [working paper](https://github.com/cilvento/b2dp/blob/master/docs/working_papers/integer_partitions.pdf).
+//! * The sparse vector mechanism implementation is based on a [working paper](https://github.com/cilvento/b2dp/blob/master/docs/working_papers/sparse_vector.pdf) that describes
 //!   the dangers of inexact implementation of sparse vector, and in particular
 //!   how randomness alignment must be adjusted to deal with finite values. 
 //! 
