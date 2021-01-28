@@ -89,9 +89,10 @@
 //! # Ok(())
 //! # }
 //! ```
-//! **Sparse Vector** an exact implementation of discrete sparse vector (upcoming work). Takes in a
-//! set of query values (does not currently support a query function interface) and returns 
-//! `true` or `false` depending on whether each query exceeds the fixed threshold of `0`. 
+//! **Sparse Vector** an exact implementation of discrete sparse vector. 
+//! Takes in a set of query values (does not currently support a query function 
+//! interface) and returns `true` or `false` depending on whether each query 
+//! exceeds the fixed threshold of `0`. 
 //! 
 //! ```
 //! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector, errors::*};
@@ -112,7 +113,32 @@
 //! # }
 //! ```
 //! 
-//! **Noisy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise
+//! **Sparse Vector *with gap*** an exact implementation of discrete 
+//! sparse vector. Takes in a set of query values (does not 
+//! currently support a query function interface) and gaps and returns the 
+//! largest gap if the noisy query exceeds the fixed noisy threshold of 0.
+//! 
+//! ```
+//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector_with_gap, errors::*};
+//! # use rug::Float;
+//! # fn main() -> Result<()> {
+//! let eta1 = Eta::new(1,1,2)?;
+//! let eta2 = Eta::new(1,1,2)?;
+//! let c = 2;
+//! let queries = vec![1.0,2.0,3.0,4.0,5.0,1.0];
+//! let gaps = vec![1.0, 2.0, 3.0];
+//! let gamma = 0.5;
+//! let q_min = 0.0;
+//! let q_max = 6.0;
+//! let w = 5.0;
+//! let rng = GeneratorOpenSSL {};
+//! let optimize = false;
+//! let outputs = sparse_vector_with_gap(eta1, eta2, c, &gaps, &queries, gamma, q_min, q_max, w, rng, optimize)?;
+//! # Ok(())
+//! # }
+//! ```
+//! 
+//! **Lazy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise
 //! centered at `0` with granularity `gamma` exceeds the given `threshold`. 
 //! 
 //! ```
@@ -216,5 +242,6 @@ pub use utilities::discretesampling::sample_within_bounds;
 
 // Sparse Vector
 pub use mechanisms::sparsevector::sparse_vector;
+pub use mechanisms::sparsevector::sparse_vector_with_gap;
 
 

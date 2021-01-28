@@ -218,7 +218,8 @@ pub fn adjust_eta(eta: Eta, gamma_inv: &Float, arithmeticconfig: & mut Arithmeti
 ///   * `arithmeticconfig`: ArithmeticConfig with sufficient precision
 ///   * `gamma`: granularity parameter
 ///   * `threshold`: the threshold value 
-///   * `cond_threshold`: (Must be smaller than `threshold`)
+///   * `cond_threshold`: the conditional threshold value already exceeded
+///      (Must be smaller than `threshold`)
 ///   * `rng`: randomness source
 ///   * `optimize`: whether to optimize sampling, exacerbates timing channels
 /// 
@@ -308,7 +309,10 @@ pub fn conditional_lazy_threshold<R: ThreadRandGen>(eta: Eta,
         return Err("`cond_threshold` must be integer multiple of `gamma`."
         .into()); 
     }
+
+    // Convert to integer multiples
     let t = arithmeticconfig.get_float(threshold*gamma_inv); 
+    let ct = arithmeticconfig.get_float(cond_threshold*gamma_inv); 
 
     // Sum of weights above the threshold
     let p_top = get_sum(&base,
@@ -318,9 +322,9 @@ pub fn conditional_lazy_threshold<R: ThreadRandGen>(eta: Eta,
     // Sum of weights between the conditional threshold and positive infinity
     let p_total = get_sum(&base,
                         arithmeticconfig, 
-                        &cond_threshold, 
+                        &ct, 
                         &plus_infty)?;
-    let p_bot = arithmeticconfig.get_float(p_total - &p_top);
+    let p_bot = arithmeticconfig.get_float(&p_total - &p_top);
     let weights: Vec<Float> = vec![p_top,p_bot];
     let s = normalized_sample(&weights, arithmeticconfig,rng,optimize)?;
     
@@ -415,6 +419,8 @@ pub fn lazy_threshold<R: ThreadRandGen>(eta: Eta,
             return Err("`threshold` must be integer multiple of `gamma`."
             .into()); 
         }
+
+        // Convert to integer multiple
         let t = arithmeticconfig.get_float(threshold*gamma_inv); 
 
         let p_top = get_sum(&base,

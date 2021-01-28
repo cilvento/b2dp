@@ -218,6 +218,33 @@
 <span id="218">218</span>
 <span id="219">219</span>
 <span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # Base-2 Differential Privacy Crate</span>
 <span class="doccomment">//! Implements the exponential mechanism and other utilities for base-2 </span>
@@ -310,9 +337,10 @@
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! **Sparse Vector** an exact implementation of discrete sparse vector (upcoming work). Takes in a</span>
-<span class="doccomment">//! set of query values (does not currently support a query function interface) and returns </span>
-<span class="doccomment">//! `true` or `false` depending on whether each query exceeds the fixed threshold of `0`. </span>
+<span class="doccomment">//! **Sparse Vector** an exact implementation of discrete sparse vector. </span>
+<span class="doccomment">//! Takes in a set of query values (does not currently support a query function </span>
+<span class="doccomment">//! interface) and returns `true` or `false` depending on whether each query </span>
+<span class="doccomment">//! exceeds the fixed threshold of `0`. </span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector, errors::*};</span>
@@ -333,7 +361,32 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! </span>
-<span class="doccomment">//! **Noisy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise</span>
+<span class="doccomment">//! **Sparse Vector *with gap*** an exact implementation of discrete </span>
+<span class="doccomment">//! sparse vector. Takes in a set of query values (does not </span>
+<span class="doccomment">//! currently support a query function interface) and gaps and returns the </span>
+<span class="doccomment">//! largest gap if the noisy query exceeds the fixed noisy threshold of 0.</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! # use b2dp::{Eta,GeneratorOpenSSL, sparse_vector_with_gap, errors::*};</span>
+<span class="doccomment">//! # use rug::Float;</span>
+<span class="doccomment">//! # fn main() -&gt; Result&lt;()&gt; {</span>
+<span class="doccomment">//! let eta1 = Eta::new(1,1,2)?;</span>
+<span class="doccomment">//! let eta2 = Eta::new(1,1,2)?;</span>
+<span class="doccomment">//! let c = 2;</span>
+<span class="doccomment">//! let queries = vec![1.0,2.0,3.0,4.0,5.0,1.0];</span>
+<span class="doccomment">//! let gaps = vec![1.0, 2.0, 3.0];</span>
+<span class="doccomment">//! let gamma = 0.5;</span>
+<span class="doccomment">//! let q_min = 0.0;</span>
+<span class="doccomment">//! let q_max = 6.0;</span>
+<span class="doccomment">//! let w = 5.0;</span>
+<span class="doccomment">//! let rng = GeneratorOpenSSL {};</span>
+<span class="doccomment">//! let optimize = false;</span>
+<span class="doccomment">//! let outputs = sparse_vector_with_gap(eta1, eta2, c, &amp;gaps, &amp;queries, gamma, q_min, q_max, w, rng, optimize)?;</span>
+<span class="doccomment">//! # Ok(())</span>
+<span class="doccomment">//! # }</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! **Lazy Threshold** [`lazy_threshold`](./utilities/discretesampling/fn.lazy_threshold.html) determines whether discrete Laplace noise</span>
 <span class="doccomment">//! centered at `0` with granularity `gamma` exceeds the given `threshold`. </span>
 <span class="doccomment">//! </span>
 <span class="doccomment">//! ```</span>
@@ -437,6 +490,7 @@
 
 <span class="comment">// Sparse Vector</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mechanisms</span>::<span class="ident">sparsevector</span>::<span class="ident">sparse_vector</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mechanisms</span>::<span class="ident">sparsevector</span>::<span class="ident">sparse_vector_with_gap</span>;
 
 
 </pre></div>
